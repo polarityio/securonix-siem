@@ -24,7 +24,8 @@ const getLookupResults = (entities, options, requestWithDefaults, Logger) =>
     const lookupResults = createLookupResults(
       options.url,
       entityGroups,
-      violationResponse
+      violationResponse,
+      Logger
     );
 
     return lookupResults;

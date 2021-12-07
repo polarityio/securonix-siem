@@ -1,224 +1,346 @@
-<ul class="nav nav-tabs">
-  <li class="nav-item">
-    <a {{action "changeTab" "violations"}} class="nav-link {{if (or (eq activeTab "violations")(not activeTab)) "active"}}" href="#">
+<ul class='nav nav-tabs'>
+  <li class='nav-item'>
+    <a
+      {{action 'changeTab' 'violations'}}
+      class='nav-link {{if (or (eq activeTab 'violations') (not activeTab)) 'active'}}'
+      href='#'
+    >
       Violations
     </a>
   </li>
   {{#if details.associatedUsers.length}}
-    <li class="nav-item">
-      <a {{action "changeTab" "associatedUsers"}} class="nav-link {{if (eq activeTab "associatedUsers") "active"}}" href="#">
+    <li class='nav-item'>
+      <a
+        {{action 'changeTab' 'associatedUsers'}}
+        class='nav-link {{if (eq activeTab 'associatedUsers') 'active'}}'
+        href='#'
+      >
         Users
       </a>
     </li>
   {{/if}}
 </ul>
-<div class="view-in-ts">
-  <a class="p-link" href={{details.dashboardUrl}}>View in Securonix
-    {{fa-icon "external-link-square" class="external-link-icon"}}</a>
+<div class='view-in-ts'>
+  <a class='p-link' href={{details.dashboardUrl}}>View in Securonix
+    {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
 </div>
-{{#if (eq activeTab "violations")}}
-  <div class="mb-1">
+
+{{#if (eq activeTab 'violations')}}
+  <div class='mb-1'>
     {{#each details.violations as |violation index|}}
       {{#if (gt index 0)}}
-        <hr>
+        <hr />
       {{/if}}
 
-      <h1 class="p-title">
-        {{fa-icon "do-not-enter" fixedWidth=true}} {{violation.riskthreatname}}
+      <h1 class='p-title'>
+        {{fa-icon 'do-not-enter' fixedWidth=true}}
+        {{violation.riskthreatname}}
       </h1>
-      {{#if violation.associatedUser.fullname}}
-        <div>
-          <span class="p-key">Associated User:</span>
-          <span class="p-value">{{violation.associatedUser.fullname}}</span>
-        </div>
-      {{/if}}
       {{#if violation.policyname}}
         <div>
-          <span class="p-key">Policy:</span>
-          <span class="p-value">{{violation.policyname}}</span>
+          <span class='p-key'>Policy:</span>
+          <span class='p-value'>{{violation.policyname}}</span>
         </div>
       {{/if}}
       {{#if violation.category}}
         <div>
-          <span class="p-key">Category:</span>
-          <span class="p-value">{{titleize (humanize (dasherize violation.category))}}</span>
+          <span class='p-key'>Category:</span>
+          <span class='p-value'>{{titleize
+              (humanize (dasherize violation.category))
+            }}</span>
         </div>
       {{/if}}
       {{#if violation.eventoutcome}}
         <div>
-          <span class="p-key">Outcome:</span>
-          <span class="p-value">{{violation.eventoutcome}}</span>
+          <span class='p-key'>Outcome:</span>
+          <span class='p-value'>{{violation.eventoutcome}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.associatedUser.fullname}}
+        <div>
+          <span class='p-key'>Associated User:</span>
+          <span class='p-value'>{{violation.associatedUser.fullname}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.u_workemail}}
+        <div>
+          <span class='p-key'>Associated User Email:</span>
+          <span class='p-value'>{{violation.u_workemail}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.accountname}}
+        <div>
+          <span class='p-key'>Account Name:</span>
+          <span class='p-value'>{{violation.accountname}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.sourceusername}}
+        <div>
+          <span class='p-key'>Source UserName:</span>
+          <span class='p-value'>{{violation.sourceusername}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.tenantname}}
+        <div>
+          <span class='p-key'>Tenant Name:</span>
+          <span class='p-value'>{{violation.tenantname}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.emailsenderdomain}}
+        <div>
+          <span class='p-key'>Email Sender Domain:</span>
+          <span class='p-value'>{{violation.emailsenderdomain}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.resourcename}}
+        <div>
+          <span class='p-key'>Resource Name:</span>
+          <span class='p-value'>{{violation.resourcename}}</span>
+        </div>
+      {{/if}}
+      {{#if violation.deviceaction}}
+        <div>
+          <span class='p-key'>Device Action:</span>
+          <span class='p-value'>{{violation.deviceaction}}</span>
         </div>
       {{/if}}
       {{#if violation.filename}}
         <div>
-          <span class="p-key">File Name:</span>
-          <span class="p-value">{{violation.filename}}</span>
+          <span class='p-key'>File Name:</span>
+          <span class='p-value'>{{violation.filename}}</span>
         </div>
       {{/if}}
       {{#if violation.ipaddress}}
         <div>
-          <span class="p-key">IP Address:</span>
-          <span class="p-value">{{violation.ipaddress}}</span>
+          <span class='p-key'>IP Address:</span>
+          <span class='p-value'>{{violation.ipaddress}}</span>
         </div>
       {{/if}}
       {{#if violation.oldfilepath}}
         <div>
-          <span class="p-key">Filepath:</span>
-          <span class="p-value">{{violation.oldfilepath}}</span>
+          <span class='p-key'>Filepath:</span>
+          <span class='p-value'>{{violation.oldfilepath}}</span>
         </div>
       {{/if}}
       {{#if violation.requesturl}}
         <div>
-          <span class="p-key">Request URL:</span>
-          <span class="p-value">{{violation.requesturl}}</span>
+          <span class='p-key'>Request URL:</span>
+          <span class='p-value'>{{violation.requesturl}}</span>
         </div>
       {{/if}}
       {{#if violation.eventcountry}}
         <div>
-          <span class="p-key">Country:</span>
-          <span class="p-value">{{violation.eventcountry}}</span>
+          <span class='p-key'>Country:</span>
+          <span class='p-value'>{{violation.eventcountry}}</span>
         </div>
       {{/if}}
       {{#if violation.eventcity}}
         <div>
-          <span class="p-key">City:</span>
-          <span class="p-value">{{violation.eventcity}}</span>
+          <span class='p-key'>City:</span>
+          <span class='p-value'>{{violation.eventcity}}</span>
         </div>
       {{/if}}
       {{#if violation.rg_name}}
         <div>
-          <span class="p-key">RG Name:</span>
-          <span class="p-value">{{violation.rg_name}}</span>
+          <span class='p-key'>RG Name:</span>
+          <span class='p-value'>{{violation.rg_name}}</span>
         </div>
       {{/if}}
-      {{#if violation.eventtime}}
-        <div class="p-title">Times Violation Occurred ({{violation.violationCount}}):</div>
-        <div class="wrap-container">
-          {{#each violation.eventtime as |time|}}
-            <span class="time-container">{{time}}</span>
-          {{/each}}
-        </div>
+      {{#if violation.datetime.length}}
+        {{#if (get expandableTitleStates.datetime index)}}
+          <a
+            href='#'
+            class='expandable-title'
+            {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+          >
+            <span class='text'>Times Violation Occurred ({{violation.violationCount}}):</span>
+            {{fa-icon 'angle-up'}}
+          </a>
+          <div class='wrap-container'>
+            {{#each violation.datetime as |time|}}
+              <span class='time-container'>{{moment-format
+                  time
+                  'ddd, DD MMM YYYY HH:mm:ss'
+                  timeZone=timezone
+                }}</span>
+            {{/each}}
+          </div>
+        {{else}}
+          <a
+            href='#'
+            class='expandable-title'
+            {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+          >
+            <span class='text'>Times Violation Occurred ({{violation.violationCount}}):</span>
+            {{fa-icon 'angle-down'}}
+          </a>
+        {{/if}}
+      {{/if}}
+      {{#if (get expandableTitleStates.allFields index)}}
+        <a
+          href='#'
+          class='expandable-title'
+          {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
+        >
+          <span class='text'>Example Log</span>
+          {{fa-icon 'angle-up'}}
+        </a>
+        <pre>{{#each-in violation.allFields as |key value|}}<span class='p-value'>{{key}}&nbsp;=&nbsp;</span><span class='p-key'>{{value}},<br></span>{{/each-in}}</pre>
+      {{else}}
+        <a
+          href='#'
+          class='expandable-title'
+          {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
+        >
+          <span class='text'>Example Log</span>
+          {{fa-icon 'angle-down'}}
+        </a>
       {{/if}}
     {{/each}}
     {{#if (gte details.violations.length 40)}}
-      <hr>
-      <div class="view-in-ts end">
-        <a class="p-link" href={{details.dashboardUrl}}>
+      <hr />
+      <div class='view-in-ts end'>
+        <a class='p-link' href={{details.dashboardUrl}}>
           ...Find all in Securonix
-          {{fa-icon "external-link-square" class="external-link-icon"}}
+          {{fa-icon 'external-link-square' class='external-link-icon'}}
         </a>
       </div>
     {{/if}}
   </div>
 {{else}}
-  <div class="mb-1">
+  <div class='mb-1'>
     {{#each details.associatedUsers as |associatedUser index|}}
       {{#if (gt index 0)}}
-        <hr>
+        <hr />
       {{/if}}
       <div>
-        <h1 class="p-title">
-          {{fa-icon "user" fixedWidth=true}}
+        <h1 class='p-title'>
+          {{fa-icon 'user' fixedWidth=true}}
           {{#if associatedUser.fullname}}
             {{associatedUser.fullname}}
           {{else}}
             {{associatedUser.workemail}}
           {{/if}}
-          {{#if (or associatedUser.employeeid associatedUser.sourceusername)}}
-            {{#if associatedUser.employeeid}}
-              ({{associatedUser.employeeid}})
-            {{else}}
-              ({{associatedUser.sourceusername}})
-            {{/if}}
+          {{#if
+            (or
+              associatedUser.employeeid
+              associatedUser.sourceusername
+              associatedUser.accountname
+              associatedUser.tenantname
+            )
+          }}
+            ({{or
+              associatedUser.employeeid
+              associatedUser.sourceusername
+              associatedUser.accountname
+              associatedUser.tenantname
+            }})
           {{/if}}
         </h1>
         {{#if associatedUser.title}}
           <div>
-            <span class="p-key">Title:</span>
-            <span class="p-value">{{associatedUser.title}}</span>
+            <span class='p-key'>Title:</span>
+            <span class='p-value'>{{associatedUser.title}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.division}}
           <div>
-            <span class="p-key">Division:</span>
-            <span class="p-value">{{associatedUser.division}}</span>
+            <span class='p-key'>Division:</span>
+            <span class='p-value'>{{associatedUser.division}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.department}}
           <div>
-            <span class="p-key">Department:</span>
-            <span class="p-value">{{associatedUser.department}}</span>
+            <span class='p-key'>Department:</span>
+            <span class='p-value'>{{associatedUser.department}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.timeWithCompany}}
           <div>
-            <span class="p-key">Time With Company:</span>
-            <span class="p-value">{{associatedUser.timeWithCompany}}</span>
+            <span class='p-key'>Time With Company:</span>
+            <span class='p-value'>{{associatedUser.timeWithCompany}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.employeetypedescription}}
           <div>
-            <span class="p-key">Employee Type:</span>
-            <span class="p-value">{{associatedUser.employeetypedescription}}</span>
+            <span class='p-key'>Employee Type:</span>
+            <span class='p-value'>{{associatedUser.employeetypedescription}}</span>
+          </div>
+        {{/if}}
+        {{#if associatedUser.statusdescription}}
+          <div>
+            <span class='p-key'>Status Description:</span>
+            <span class='p-value'>{{associatedUser.statusdescription}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.riskscore}}
           <div>
-            <span class="p-key">Risk Score:</span>
-            <span class="p-value">{{associatedUser.riskscore}}</span>
+            <span class='p-key'>Risk Score:</span>
+            <span class='p-value'>{{associatedUser.riskscore}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.flightRiskLevel}}
           <div>
-            <span class="p-key">Flight Risk Level:</span>
-            <span class="p-value">{{associatedUser.flightRiskLevel}}</span>
+            <span class='p-key'>Flight Risk Level:</span>
+            <span class='p-value'>{{associatedUser.flightRiskLevel}}</span>
           </div>
         {{/if}}
+
         {{#if associatedUser.criticality}}
           <div>
-            <span class="p-key">Threat Level:</span>
-            <span class="p-value">{{associatedUser.criticality}}</span>
+            <span class='p-key'>Threat Level:</span>
+            <span class='p-value'>{{associatedUser.criticality}}</span>
           </div>
         {{/if}}
         {{#if associatedUser.violationCount}}
           <div>
-            <span class="p-key">Violation Count:</span>
-            <span class="p-value">{{associatedUser.violationCount}}</span>
+            <span class='p-key'>Violation Count:</span>
+            <span class='p-value'>{{associatedUser.violationCount}}</span>
           </div>
         {{/if}}
-
+        {{#if associatedUser.country}}
+          <div>
+            <span class='p-key'>Country:</span>
+            <span class='p-value'>{{associatedUser.country}}</span>
+          </div>
+        {{/if}}
+        {{#if associatedUser.location}}
+          <div>
+            <span class='p-key'>Location:</span>
+            <span class='p-value'>{{associatedUser.location}}</span>
+          </div>
+        {{/if}}
+        {{#if associatedUser.lanid}}
+          <div>
+            <span class='p-key'>LAN ID:</span>
+            <span class='p-value'>{{associatedUser.lanid}}</span>
+          </div>
+        {{/if}}
+        {{#if associatedUser.timezoneoffset}}
+          <div>
+            <span class='p-key'>Time Zone:</span>
+            <span class='p-value'>{{associatedUser.timezoneoffset}}</span>
+          </div>
+        {{/if}}
+        {{#if associatedUser.hiredate}}
+          <div>
+            <span class='p-key'>Hire Date:</span>
+            <span class='p-value'>{{associatedUser.hiredate}}</span>
+          </div>
+        {{/if}}
         {{#if (or associatedUser.workemail associatedUser.workphone)}}
-          <h1 class="p-title">Contact Info:</h1>
+          <h1 class='p-title'>Contact Info:</h1>
 
           {{#if (and associatedUser.workemail associatedUser.fullname)}}
             <div>
-              <span class="p-key">Work Email:</span>
-              <span class="p-value">{{associatedUser.workemail}}</span>
+              <span class='p-key'>Work Email:</span>
+              <span class='p-value'>{{associatedUser.workemail}}</span>
             </div>
           {{/if}}
           {{#if associatedUser.workphone}}
             <div>
-              <span class="p-key">Phone Number:</span>
-              <span class="p-value">{{associatedUser.workphone}}</span>
-            </div>
-          {{/if}}
-          {{#if associatedUser.country}}
-            <div>
-              <span class="p-key">Country:</span>
-              <span class="p-value">{{associatedUser.country}}</span>
-            </div>
-          {{/if}}
-          {{#if associatedUser.location}}
-            <div>
-              <span class="p-key">Location:</span>
-              <span class="p-value">{{associatedUser.location}}</span>
-            </div>
-          {{/if}}
-          {{#if associatedUser.timezoneoffset}}
-            <div>
-              <span class="p-key">Time Zone:</span>
-              <span class="p-value">{{associatedUser.timezoneoffset}}</span>
+              <span class='p-key'>Phone Number:</span>
+              <span class='p-value'>{{associatedUser.workphone}}</span>
             </div>
           {{/if}}
         {{/if}}
