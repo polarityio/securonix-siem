@@ -1,13 +1,13 @@
-"use strict";
+'use strict';
 
-const NodeCache = require("node-cache");
+const NodeCache = require('node-cache');
 
-const validateOptions = require("./helpers/validateOptions");
-const createRequestWithDefaults = require("./helpers/createRequestWithDefaults");
+const _validateOptions = require('./helpers/validateOptions');
+const createRequestWithDefaults = require('./helpers/createRequestWithDefaults');
 
-const { TIME_FOR_TOKEN_DAYS } = require("./helpers/constants");
-const handleError = require("./helpers/handleError");
-const { getLookupResults } = require("./helpers/getLookupResults");
+const { TIME_FOR_TOKEN_DAYS } = require('./helpers/constants');
+const handleError = require('./helpers/handleError');
+const { getLookupResults } = require('./helpers/getLookupResults');
 
 let Logger;
 let requestWithDefaults;
@@ -22,19 +22,27 @@ function startup(logger) {
 }
 
 const doLookup = async (entities, options, cb) => {
-  Logger.debug({ entities }, "Entities");
+  Logger.debug({ entities }, 'Entities');
 
   let lookupResults;
   try {
-    lookupResults = await getLookupResults(entities, options, requestWithDefaults, Logger);
+    lookupResults = await getLookupResults(
+      entities,
+      options,
+      requestWithDefaults,
+      Logger
+    );
   } catch (error) {
-    Logger.error({ error }, "Get Lookup Results Failed");
+    Logger.error({ error }, 'Get Lookup Results Failed');
     return cb(handleError(error));
   }
 
-  Logger.trace({ lookupResults }, "Lookup Results");
+  Logger.trace({ lookupResults }, 'Lookup Results');
   cb(null, lookupResults);
 };
+
+const validateOptions = (options, callback) =>
+  _validateOptions(requestWithDefaults, Logger, options, callback);
 
 module.exports = {
   doLookup,

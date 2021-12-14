@@ -1,50 +1,71 @@
-const _ = require("lodash");
+const _ = require('lodash');
 
-const getViolationsForThisEntity = require("./getViolationsForThisEntity");
-const getAssociatedUsers = require("./getAssociatedUsers");
-const getViolations = require("./getViolations");
+const getViolationsForThisEntity = require('./getViolationsForThisEntity');
+const getAssociatedUsers = require('./getAssociatedUsers');
+const getViolations = require('./getViolations');
+const { MAX_VIOLATION_RESULTS, MAX_INCIDENTS_RESULTS } = require('../constants');
 
-const createLookupResults = (url, entityGroups, { body: { events } }) =>
+const createLookupResults = (
+  url,
+  entityGroups,
+  { body: { events } },
+  incidents,
+  Logger
+) =>
   _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
     groupEntities.map(
-      _getLookupResultForThisEntity(url, events, entityGroupType)
+      _getLookupResultForThisEntity(url, events, entityGroupType, incidents, Logger)
     )
   );
 
-const _getLookupResultForThisEntity = (url, events, entityGroupType) => (entity) => {
-  const violationEventsForThisEntity = getViolationsForThisEntity(
-    events,
-    entity,
-    entityGroupType
-  );
+const _getLookupResultForThisEntity =
+  (url, events, entityGroupType, foundIncidents, Logger) => (entity) => {
+    const violationEventsForThisEntity = getViolationsForThisEntity(
+      events,
+      entity,
+      entityGroupType
+    );
 
-  const associatedUsers = getAssociatedUsers(violationEventsForThisEntity);
+    const associatedUsers = getAssociatedUsers(violationEventsForThisEntity, Logger);
 
-  const violations = getViolations(
-    associatedUsers,
-    violationEventsForThisEntity,
-    entityGroupType
-  );
+    const violations = getViolations(
+      associatedUsers,
+      violationEventsForThisEntity,
+      entityGroupType
+    );
 
-  const violationsCount = violations.reduce(
-    (agg, violation) => agg + violation.violationCount,
-    0
-  );
+    const violationsCount = violations.reduce(
+      (agg, violation) => agg + violation.violationCount,
+      0
+    );
 
-  return {
-    entity,
-    data: violationsCount === 0 ? null : {
-      details: {
-        associatedUsers,
-        violations: _.chain(violations)
-          .orderBy("violationCount", "desc")
-          .slice(0, 40)
-          .value(),
-        violationsCount,
-        dashboardUrl: `${url}/Snypr/configurableDashboards/view`
-      }
-    }
+    const incidents = foundIncidents[entity.value];
+
+    return {
+      entity,
+      data:
+        violationsCount || _.size(incidents)
+          ? {
+              details: {
+                associatedUsers,
+                violations: _.chain(violations)
+                  .orderBy('violationCount', 'desc')
+                  .slice(0, MAX_VIOLATION_RESULTS)
+                  .value(),
+                violationsCount,
+                spotterUrl: `${url}/Snypr/spotter/loadDashboard`,
+                MAX_VIOLATION_RESULTS,
+                incidentsCount: _.size(incidents),
+                incidents: _.chain(incidents)
+                  .orderBy('lastUpdateDate', 'desc')
+                  .slice(0, MAX_INCIDENTS_RESULTS)
+                  .value(),
+                MAX_INCIDENTS_RESULTS,
+                incidentUrl: `${url}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10`
+              }
+            }
+          : null
+    };
   };
-};
 
 module.exports = createLookupResults;

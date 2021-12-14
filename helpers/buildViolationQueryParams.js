@@ -11,7 +11,7 @@ const _buildSecuronixQuery = (entityGroups) => {
   const getEntityGroupQueryString = (groupEntities, entityGroupType) =>
     _.chain(groupEntities)
       .flatMap(({ value }) =>
-        QUERY_KEYS[entityGroupType].map((queryKey) => `${queryKey}="*${value}*"`)
+        QUERY_KEYS[entityGroupType].map((queryKey) => `${queryKey}="${value}"`)
       )
       .join(" OR ")
       .value();
