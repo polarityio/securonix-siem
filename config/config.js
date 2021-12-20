@@ -3,7 +3,12 @@ module.exports = {
   acronym: 'SX',
   description:
     'The Securonix Integration connects to their api to find user Violation and Incident information',
-  entityTypes: ['ipv4', 'email', 'domain', 'string'],
+  entityTypes: [
+    'ipv4',
+    'email',
+    'domain'
+    //'string'
+  ],
   customTypes: [
     // {
     //   key: 'username',
