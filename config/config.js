@@ -22,7 +22,7 @@ module.exports = {
     // }
   ],
   styles: ['./styles/styles.less'],
-  defaultColor: 'light-purple',
+  defaultColor: 'light-blue',
   onDemandOnly: true,
   block: {
     component: {
