@@ -15,20 +15,6 @@ const validateOptions = async (requestWithDefaults, Logger, options, callback) =
   );
 
   const errors = urlValidationError.concat(stringValidationErrors);
-  if (!errors.length && options.searchIncidents.value) {
-    try {
-      await getAllIncidents(
-        {
-          monthsBack: options.monthsBack.value,
-          username: options.username.value,
-          password: options.password.value,
-          url: options.url.value
-        },
-        requestWithDefaults,
-        Logger
-      );
-    } catch (_) {}
-  }
   callback(null, errors);
 };
 
