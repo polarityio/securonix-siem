@@ -1,15 +1,15 @@
 {
   "main": "./integration.js",
   "name": "securonix-siem",
-  "version": "3.0.1-beta",
+  "version": "3.1.0-beta",
   "private": true,
   "license": "MIT",
   "author": "Polarity",
   "dependencies": {
     "aigle": "^1.14.1",
-    "lodash": "^4.17.15",
-    "moment": "^2.24.0",
-    "node-cache": "^4.2.0",
+    "lodash": "^4.17.21",
+    "moment": "^2.29.1",
+    "node-cache": "^5.1.2",
     "request": "^2.88.2"
   }
 }

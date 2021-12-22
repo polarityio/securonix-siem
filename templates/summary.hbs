@@ -1,10 +1,18 @@
-<span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
-  <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
-  <span class="integration-text-color">Associated Violations: {{details.violationsCount}}</span>
-</span>
+{{#if details.violationsCount}}
+  <span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
+    <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
+    <span class="integration-text-color">Violations: {{details.violationsCount}}</span>
+  </span>
+{{/if}}
 {{#if details.associatedUsers.length}}
   <span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
     <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
     <span class="integration-text-color">Associated Users: {{details.associatedUsers.length}}</span>
+  </span>
+{{/if}}
+{{#if details.incidentsCount}}
+  <span {{on "click" (optional this.scrollToIntegration)}} class="integration-summary-tag integration-background-color integration-border-color">
+    <span class="acronym integration-text-bold-color">{{block.acronym}}</span>
+    <span class="integration-text-color">Incidents: {{details.incidentsCount}}</span>
   </span>
 {{/if}}

@@ -11,20 +11,21 @@ const getViolationResponse = (entityGroups, options, requestWithDefaults, Logger
     qs: buildViolationQueryParams(entityGroups, options.monthsBack),
     json: true
   })
-    .then(_checkForInternalSecuronixError)
+    .then(_checkForInternalSecuronixError(Logger))
     .catch((error) => {
-      Logger.error({ error }, "Violation Query Error");
+      Logger.error({ error }, 'Violation Query Error');
       throw error;
     });
 
-const _checkForInternalSecuronixError = (response) => {
+const _checkForInternalSecuronixError = (Logger) => (response) => {
   const {
     body: { error, errorMessage }
   } = response;
-  if (error) {
-    const internalSecuronixError = Error("Internal Securonix Query Error");
-    internalSecuronixError.status = "internalSecuronixError";
-    internalSecuronixError.description = errorMessage;
+  Logger.trace({ error, errorMessage, response }, 'Get Violations Request');
+  if (error || errorMessage) {
+    const internalSecuronixError = Error('Internal Securonix Query Error');
+    internalSecuronixError.status = 'internalSecuronixError';
+    internalSecuronixError.description = errorMessage || error;
     throw internalSecuronixError;
   }
   return response;
