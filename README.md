@@ -20,7 +20,7 @@ Your Securonix username
 
 ### Password
 
-Your Securonix Password
+Password for the provided Securonix username
 
 ### Search For Employee ID
 
