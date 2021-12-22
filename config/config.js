@@ -2,19 +2,19 @@ module.exports = {
   name: 'Securonix',
   acronym: 'SX',
   description:
-    'The Securonix Integration connects to their api to find user Violation and Incident information',
+    'Search Securonix for user Violation and Incident information',
   entityTypes: [
     'ipv4',
     'email',
     'domain'
-    //'string'
+    //,'string'
   ],
   customTypes: [
     // {
     //   key: 'username',
     //   // Replace this regex with a regex for your own username
     //   regex: /\b[A-Z]{1}[0-9]{6}\b/
-    // },
+    // }
     // {
     //   key: 'hostname',
     //   // Replace this regex with a regex for your own hostnames
@@ -64,7 +64,7 @@ module.exports = {
     },
     {
       key: 'username',
-      name: 'Valid Username',
+      name: 'Username',
       description: 'Valid Securonix Username',
       default: '',
       type: 'text',
@@ -73,8 +73,8 @@ module.exports = {
     },
     {
       key: 'password',
-      name: 'Valid Password',
-      description: 'Valid Securonix Password',
+      name: 'Password',
+      description: 'Password for the provided Securonix username',
       default: '',
       type: 'password',
       userCanEdit: true,
@@ -84,7 +84,7 @@ module.exports = {
       key: 'searchForEmployeeId',
       name: 'Search For Employee ID',
       description:
-        'Allows you to search Securonix using Employee IDs found in Allowlisted Channels.',
+        'If enabled, the integration will search Securonix for Employee IDs in the specified Channel.  This option should be used in conjunction with a Channel Entity Filter on the "Annotated Entities" entity type.',
       default: true,
       type: 'boolean',
       userCanEdit: true,
@@ -94,7 +94,7 @@ module.exports = {
       key: 'searchIncidents',
       name: 'Search Incidents',
       description:
-        'Allows you to search Securonix for Incidents with your entities involved.',
+        'If enabled, allows you to search Securonix for Incidents related to searched entities.',
       default: true,
       type: 'boolean',
       userCanEdit: true,
