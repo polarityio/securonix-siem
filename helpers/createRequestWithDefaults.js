@@ -5,6 +5,8 @@ const { promisify } = require("util");
 const config = require("../config/config");
 const getAuthToken = require("./getAuthToken");
 
+const SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES = [200];
+
 const MAX_AUTH_RETRIES = 1;
 const _configFieldIsValid = (field) =>
   typeof field === "string" && field.length > 0;
@@ -21,39 +23,51 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     ...(_configFieldIsValid(passphrase) && { passphrase }),
     ...(_configFieldIsValid(proxy) && { proxy }),
     ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized }),
-    rejectUnauthorized:false
   };
 
   const requestWithDefaults = (
     preRequestFunction = () => ({}),
     postRequestSuccessFunction = (x) => x,
-    postRequestFailureFunction = (e) => { throw e; }
-  ) => async ({ json: bodyWillBeJSON, ...requestOptions }) => {
-    const _requestWithDefault = promisify(request.defaults(defaults));
-    const preRequestFunctionResults = await preRequestFunction(requestOptions);
-    const _requestOptions = {
-      ...requestOptions,
-      ...preRequestFunctionResults,
-    };
-
-    let postRequestFunctionResults;
-    try {
-      const { body, ...result } = await _requestWithDefault(_requestOptions);
-
-      checkForError({ body, ...result });
-
-      postRequestFunctionResults = await postRequestSuccessFunction({
-        ...result,
-        body: bodyWillBeJSON ? JSON.parse(body) : body,
-      });
-    } catch (error) {
-      postRequestFunctionResults = await postRequestFailureFunction(
-        error,
-        _requestOptions
-      );
+    postRequestFailureFunction = (e) => {
+      throw e;
     }
+  ) => {
+    const defaultsRequest = request.defaults(defaults);
 
-    return postRequestFunctionResults;
+    const _requestWithDefault = (requestOptions) =>
+      new Promise((resolve, reject) => {
+        defaultsRequest(requestOptions, (err, res, body) => {
+          if (err) return reject(err);
+          resolve({ ...res, body });
+        });
+      });
+
+    return async ({ json: bodyWillBeJSON, ...requestOptions }) => {
+      const preRequestFunctionResults = await preRequestFunction(requestOptions);
+      const _requestOptions = {
+        ...requestOptions,
+        ...preRequestFunctionResults
+      };
+      
+      let postRequestFunctionResults;
+      try {
+        const result = await _requestWithDefault(_requestOptions);
+
+        checkForStatusError(result, _requestOptions);
+
+        postRequestFunctionResults = await postRequestSuccessFunction({
+          ...result,
+          body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
+        });
+      } catch (error) {
+        postRequestFunctionResults = await postRequestFailureFunction(
+          error,
+          _requestOptions
+        );
+      }
+
+      return postRequestFunctionResults;
+    };
   };
 
   const handleAuth = async (requestOptions) => {
@@ -109,13 +123,27 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     }
   };
 
-  const checkForError = ({ statusCode, body }, requestOptions) => {
-    if (Math.round(statusCode / 100) * 100 !== 200) {
-      const securonixRequestError = Error("Securonix Request Error");
-      securonixRequestError.status = statusCode;
-      securonixRequestError.description = body;
-      securonixRequestError.requestOptions = requestOptions;
-      throw securonixRequestError;
+  const checkForStatusError = ({ statusCode, body }, requestOptions) => {
+    Logger.trace({
+      requestOptions: {
+        ...requestOptions,
+        headers: {
+          ...requestOptions.headers,
+          token: '************',
+        },
+        options: '************'
+      },
+      statusCode,
+      body
+    });
+
+    const roundedStatus = Math.round(statusCode / 100) * 100;
+    if (!SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(roundedStatus)) {
+      const requestError = Error('Request Error');
+      requestError.status = statusCode;
+      requestError.description = JSON.stringify(body);
+      requestError.requestOptions = JSON.stringify(requestOptions);
+      throw requestError;
     }
   };
 
