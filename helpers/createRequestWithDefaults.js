@@ -1,15 +1,14 @@
-const fs = require("fs");
-const request = require("request");
-const { promisify } = require("util");
+const fs = require('fs');
+const request = require('request');
+const { promisify } = require('util');
 
-const config = require("../config/config");
-const getAuthToken = require("./getAuthToken");
+const config = require('../config/config');
+const getAuthToken = require('./getAuthToken');
 
 const SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES = [200];
 
 const MAX_AUTH_RETRIES = 1;
-const _configFieldIsValid = (field) =>
-  typeof field === "string" && field.length > 0;
+const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
 
 const createRequestWithDefaults = (tokenCache, Logger) => {
   const {
@@ -22,7 +21,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     ...(_configFieldIsValid(key) && { key: fs.readFileSync(key) }),
     ...(_configFieldIsValid(passphrase) && { passphrase }),
     ...(_configFieldIsValid(proxy) && { proxy }),
-    ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized }),
+    ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized })
   };
 
   const requestWithDefaults = (
@@ -48,11 +47,11 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         ...requestOptions,
         ...preRequestFunctionResults
       };
-      
+
       let postRequestFunctionResults;
       try {
         const result = await _requestWithDefault(_requestOptions);
-
+        Logger.trace({ RESULT: result });
         checkForStatusError(result, _requestOptions);
 
         postRequestFunctionResults = await postRequestSuccessFunction({
@@ -78,18 +77,18 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         requestDefaultsWithInterceptors,
         tokenCache
       ).catch((error) => {
-        Logger.error({ error }, "Unable to retrieve Auth Token");
+        Logger.error({ error }, 'Unable to retrieve Auth Token');
         throw error;
       });
 
-      Logger.trace({ token }, "Token");
+      Logger.trace({ token }, 'Token');
 
       return {
         ...requestOptions,
         headers: {
           ...requestOptions.headers,
-          token,
-        },
+          token
+        }
       };
     }
 
@@ -98,13 +97,10 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
 
   const handleAndReformatErrors = (err) => {
     if (err.requestOptions) {
-      const retryCount =
-        (err.requestOptions && err.requestOptions.retryCount) || 0;
+      const retryCount = (err.requestOptions && err.requestOptions.retryCount) || 0;
 
       const needToRetryRequest =
-        err.status === 403 &&
-        err.requestOptions &&
-        retryCount <= MAX_AUTH_RETRIES;
+        err.status === 403 && err.requestOptions && retryCount <= MAX_AUTH_RETRIES;
 
       if (needToRetryRequest) {
         const { username, password } = err.requestOptions.headers;
@@ -124,12 +120,13 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
   };
 
   const checkForStatusError = ({ statusCode, body }, requestOptions) => {
+    Logger.trace({ BODY: body });
     Logger.trace({
       requestOptions: {
         ...requestOptions,
         headers: {
           ...requestOptions.headers,
-          token: '************',
+          token: '************'
         },
         options: '************'
       },
@@ -138,6 +135,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     });
 
     const roundedStatus = Math.round(statusCode / 100) * 100;
+
     if (!SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(roundedStatus)) {
       const requestError = Error('Request Error');
       requestError.status = statusCode;

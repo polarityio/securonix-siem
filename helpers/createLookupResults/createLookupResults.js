@@ -28,6 +28,7 @@ const _getLookupResultForThisEntity =
 
     const associatedUsers = getAssociatedUsers(violationEventsForThisEntity, Logger);
 
+
     const violations = getViolations(
       associatedUsers,
       violationEventsForThisEntity,

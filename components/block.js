@@ -3,12 +3,15 @@ polarity.export = PolarityComponent.extend({
   timezone: Ember.computed('Intl', function () {
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
+  watchListHasBeenCalled: false,
+  watchLists: null,
   activeTab: 'violations',
   expandableTitleStates: {
     allFields: {},
-    datetime: {}
+    datetime: {},
+    watchList: {}
   },
-  init() {
+  init () {
     if (this.get('details.violations') && !this.get('details.violations').length)
       this.set('activeTab', 'incidents');
 
@@ -19,7 +22,9 @@ polarity.export = PolarityComponent.extend({
       this.set('activeTab', tabName);
     },
     toggleExpandableTitle: function (index, type) {
-      console.log({ index, type });
+      if (type === 'watchList' && !this.watchListHasBeenCalled) {
+        this.getWatchLists();
+      }
       const modifiedExpandableTitleStates = Object.assign(
         {},
         this.get(`expandableTitleStates.${type}`),
@@ -27,8 +32,23 @@ polarity.export = PolarityComponent.extend({
           [index]: !this.get(`expandableTitleStates.${type}`)[index]
         }
       );
-
       this.set(`expandableTitleStates.${type}`, modifiedExpandableTitleStates);
     }
+  },
+  getWatchLists: function () {
+    this.sendIntegrationMessage({
+      action: 'getWatchLists'
+    })
+      .then((response) => {
+        console.log(JSON.stringify(response));
+        this.set('watchLists', response.body.result);
+      })
+      .catch((err) => {
+        console.log(JSON.stringify(err));
+      })
+      .finally(() => {
+        this.set('watchListHasBeenCalled', true);
+        console.log(JSON.stringify(this.get(`watchLists`)));
+      });
   }
 });
