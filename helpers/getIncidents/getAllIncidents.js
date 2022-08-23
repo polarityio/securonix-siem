@@ -43,7 +43,6 @@ const getAllIncidents = async (options, requestWithDefaults, Logger) => {
     uniqBy('incidentId')
   )(openIncidents);
 
-
   incidentCache.set('allIncidents', foundIncidents);
 
   return foundIncidents;

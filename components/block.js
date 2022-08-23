@@ -40,15 +40,13 @@ polarity.export = PolarityComponent.extend({
       action: 'getWatchLists'
     })
       .then((response) => {
-        console.log(JSON.stringify(response));
         this.set('watchLists', response.body.result);
       })
       .catch((err) => {
-        console.log(JSON.stringify(err));
+        // set message
       })
       .finally(() => {
         this.set('watchListHasBeenCalled', true);
-        console.log(JSON.stringify(this.get(`watchLists`)));
       });
   }
 });

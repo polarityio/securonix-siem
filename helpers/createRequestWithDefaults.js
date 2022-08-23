@@ -1,7 +1,5 @@
 const fs = require('fs');
 const request = require('request');
-const { promisify } = require('util');
-
 const config = require('../config/config');
 const getAuthToken = require('./getAuthToken');
 
@@ -150,6 +148,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     (r) => r,
     handleAndReformatErrors
   );
+  
   return requestDefaultsWithInterceptors;
 };
 

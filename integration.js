@@ -8,7 +8,6 @@ const createRequestWithDefaults = require('./helpers/createRequestWithDefaults')
 const { TIME_FOR_TOKEN_DAYS } = require('./helpers/constants');
 const handleError = require('./helpers/handleError');
 const { getLookupResults } = require('./helpers/getLookupResults');
-const { options } = require('postman-request');
 
 let Logger;
 let requestWithDefaults;
@@ -43,7 +42,6 @@ const doLookup = async (entities, options, cb) => {
 };
 
 const getWatchLists = async (options, requestWithDefaults, Logger) => {
-  Logger.trace({ HERE: 'awdsasdas' });
   const response = await requestWithDefaults({
     uri: `${options.url}/Snypr/ws/incident/listWatchlist`,
     headers: {
@@ -53,16 +51,13 @@ const getWatchLists = async (options, requestWithDefaults, Logger) => {
     },
     json: true
   });
-  Logger.trace({ WATCH_LIST: 111111111, response });
   return response;
 };
 
 const onMessage = async (payload, options, cb) => {
-  Logger.trace({ PAYLOAD: 1111111111, payload });
   switch (payload.action) {
     case 'getWatchLists':
       const response = await getWatchLists(options, requestWithDefaults, Logger);
-      Logger.trace({ RESPONSE: response });
       cb(null, response);
   }
 };
@@ -76,3 +71,17 @@ module.exports = {
   onMessage,
   validateOptions
 };
+
+// Lookup - Miller will research this more on face value this doesn't look too useful
+
+// Watchlist - simple get request and list all of the responses back. Should be an onMessage button that then returns the watchlist information. *
+
+// Users - currently have associated users with violations however will need to query the user details by workemail
+
+// TPI - query domains via tpi_domain
+
+// Assets - Query assets by hostname and ips
+
+// List - Resource Groups, Users, and Peer Groups – Ignore for now until Miller gets more information
+
+// Risk history -- query user violation risks by workemail

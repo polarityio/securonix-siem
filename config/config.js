@@ -1,8 +1,7 @@
 module.exports = {
   name: 'Securonix',
   acronym: 'SX',
-  description:
-    'Search Securonix for user Violation and Incident information',
+  description: 'Search Securonix for user Violation and Incident information',
   entityTypes: [
     'ipv4',
     'email',
@@ -19,7 +18,7 @@ module.exports = {
     //   key: 'hostname',
     //   // Replace this regex with a regex for your own hostnames
     //   regex: /\w{3,}\-\w{3,}/
-    // }
+    // },
   ],
   styles: ['./styles/styles.less'],
   defaultColor: 'light-blue',

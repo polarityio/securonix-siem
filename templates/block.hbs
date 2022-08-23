@@ -212,7 +212,6 @@
           {{fa-icon 'angle-down'}}
         </a>
       {{/if}}
-
       {{#if (get expandableTitleStates.watchList index)}}
         <a
           href='#'
@@ -244,10 +243,6 @@
             <span class='p-value'>{{watchLists.Bad_Performance_Review}}</span>
           </div>
           <div>
-            <span class='p-key'>Exiting Behavior:</span>
-            <span class='p-value'>{{watchLists.Exiting_Behavior_Watchlist}}</span>
-          </div>
-          <div>
             <span class='p-key'>Bad Performance:</span>
             <span class='p-value'>{{watchLists.Bad_Performance_Review}}</span>
           </div>
@@ -263,7 +258,6 @@
             <span class='p-key'>Kognition:</span>
             <span class='p-value'>{{watchLists.Kognition}}</span>
           </div>
-
           <div>
             <span class='p-key'>Privileged Accounts:</span>
             <span class='p-value'>{{watchLists.Privileged_Accounts}}</span>
@@ -296,6 +290,7 @@
         </a>
       {{/if}}
     {{/each}}
+
     {{#if (gte details.violations.length details.MAX_VIOLATION_RESULTS)}}
       <hr />
       <div class='view-in-ts end'>
