@@ -55,11 +55,10 @@ const getWatchLists = async (options, requestWithDefaults, Logger) => {
 };
 
 const onMessage = async (payload, options, cb) => {
-  switch (payload.action) {
-    case 'getWatchLists':
-      const response = await getWatchLists(options, requestWithDefaults, Logger);
-      cb(null, response);
-  }
+  const actions = {
+    getWatchLists: await getWatchLists(options, requestWithDefaults, Logger)
+  };
+  return cb(null, actions[payload.action]);
 };
 
 const validateOptions = (options, callback) =>
@@ -71,17 +70,3 @@ module.exports = {
   onMessage,
   validateOptions
 };
-
-// Lookup - Miller will research this more on face value this doesn't look too useful
-
-// Watchlist - simple get request and list all of the responses back. Should be an onMessage button that then returns the watchlist information. *
-
-// Users - currently have associated users with violations however will need to query the user details by workemail
-
-// TPI - query domains via tpi_domain
-
-// Assets - Query assets by hostname and ips
-
-// List - Resource Groups, Users, and Peer Groups – Ignore for now until Miller gets more information
-
-// Risk history -- query user violation risks by workemail

@@ -3,14 +3,16 @@ const _ = require('lodash');
 const getViolationsForThisEntity = require('./getViolationsForThisEntity');
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
+
 const { MAX_VIOLATION_RESULTS, MAX_INCIDENTS_RESULTS } = require('../constants');
 
 const createLookupResults = (
   url,
   { body: { events } },
-  userByEmails,
-  entityGroups,
+  users,
   incidents,
+  tpiResponse,
+  entityGroups,
   Logger
 ) =>
   _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
@@ -18,9 +20,10 @@ const createLookupResults = (
       _getLookupResultForThisEntity(
         url,
         events,
-        userByEmails,
-        entityGroupType,
+        users,
         incidents,
+        tpiResponse,
+        entityGroupType,
         Logger
       )
     )
@@ -29,9 +32,10 @@ const createLookupResults = (
 const _getLookupResultForThisEntity = (
   url,
   events,
-  userByEmails,
-  entityGroupType,
+  users,
   foundIncidents,
+  tpiResponse,
+  entityGroupType,
   Logger
 ) => (entity) => {
   const violationEventsForThisEntity = getViolationsForThisEntity(
@@ -58,10 +62,14 @@ const _getLookupResultForThisEntity = (
   return {
     entity,
     data:
-      violationsCount || _.size(incidents)
+      violationsCount || _.size(incidents) || _.size(users)
         ? {
             details: {
               associatedUsers,
+              usersByEmails: {
+                users,
+                userCount: _.size(users)
+              },
               violations: _.chain(violations)
                 .orderBy('violationCount', 'desc')
                 .slice(0, MAX_VIOLATION_RESULTS)

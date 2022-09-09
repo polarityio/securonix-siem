@@ -1,0 +1,189 @@
+{
+  "name": "Securonix",
+  "hostname": "dev.polarity",
+  "pid": 3295,
+  "level": 10,
+  "lookupResults": [
+    {
+      "entity": {
+        "type": "email",
+        "types": ["email"],
+        "isIP": false,
+        "isIPv4": false,
+        "isIPv6": false,
+        "isPrivateIP": false,
+        "IPType": "",
+        "isHex": false,
+        "isHash": false,
+        "isMD5": false,
+        "isSHA1": false,
+        "isSHA256": false,
+        "isSHA512": false,
+        "hashType": "",
+        "isGeo": false,
+        "isEmail": true,
+        "isURL": false,
+        "isDomain": false,
+        "isHTMLTag": false,
+        "latitude": 0,
+        "longitude": 0,
+        "channels": [],
+        "rawValue": "atuxhorn@securonix.com",
+        "requestContext": {
+          "isUserInitiated": true,
+          "requestType": "OnDemand"
+        },
+        "value": "atuxhorn@securonix.com"
+      },
+      "data": {
+        "details": {
+          "associatedUsers": [],
+          "userByEmails": [
+            {
+              "userriskscore": "0.01",
+              "firstname": "Addie",
+              "terminationdate": "1654885125882",
+              "masked": "false",
+              "usertimezoneoffset": "UTC",
+              "disabledate": "1654885125882",
+              "createdate": "1651510308000",
+              "deletedate": "1654885125882",
+              "employeeid": "d1a97ba55e94fe907f08eeb08e0103dc",
+              "userid": "atuxhorn",
+              "u_terminationdate|1654885125882_u": "Fri Jun 10 18:18:45 UTC 2022",
+              "lastsynctime": "1651510309000",
+              "lastname": "Tuxhorn",
+              "updatedate": "1654885125882",
+              "u_deletedate|1654885125882_u": "Fri Jun 10 18:18:45 UTC 2022",
+              "tenantid": "2",
+              "usercriticality": "Low",
+              "u_disabledate|1654885125882_u": "Fri Jun 10 18:18:45 UTC 2022",
+              "workemail": "atuxhorn@securonix.com",
+              "tenantname": "a1t1sipi",
+              "fullname": "Addie Tuxhorn",
+              "u_status|1654885125882_u": "0",
+              "status": "0"
+            },
+            {
+              "userriskscore": "0.01",
+              "firstname": "Addie",
+              "masked": "false",
+              "usertimezoneoffset": "UTC",
+              "createdate": "1654885126000",
+              "employeeid": "atuxhorn",
+              "userid": "atuxhorn",
+              "lastname": "Tuxhorn",
+              "updatedate": "1654885443775",
+              "tenantid": "2",
+              "usercriticality": "Low",
+              "workemail": "atuxhorn@securonix.com",
+              "tenantname": "a1t1sipi",
+              "fullname": "Addie Tuxhorn",
+              "status": "1"
+            }
+          ],
+          "violations": [],
+          "violationsCount": 0,
+          "spotterUrl": "https://a1t1sipi.securonix.net/Snypr/spotter/loadDashboard",
+          "MAX_VIOLATION_RESULTS": 40,
+          "incidentsCount": 0,
+          "incidents": [],
+          "MAX_INCIDENTS_RESULTS": 40,
+          "incidentUrl": "https://a1t1sipi.securonix.net/Snypr/configurableDashboards/view?menuname=Incident Management&section=10"
+        }
+      }
+    },
+    {
+      "entity": {
+        "type": "domain",
+        "types": ["domain"],
+        "isIP": false,
+        "isIPv4": false,
+        "isIPv6": false,
+        "isPrivateIP": false,
+        "IPType": "",
+        "isHex": false,
+        "isHash": false,
+        "isMD5": false,
+        "isSHA1": false,
+        "isSHA256": false,
+        "isSHA512": false,
+        "hashType": "",
+        "isGeo": false,
+        "isEmail": false,
+        "isURL": false,
+        "isDomain": true,
+        "isHTMLTag": false,
+        "latitude": 0,
+        "longitude": 0,
+        "channels": [],
+        "rawValue": "securonix.com",
+        "requestContext": {
+          "isUserInitiated": true,
+          "requestType": "OnDemand"
+        },
+        "value": "securonix.com"
+      },
+      "data": {
+        "details": {
+          "associatedUsers": [],
+          "userByEmails": [
+            {
+              "userriskscore": "0.01",
+              "firstname": "Addie",
+              "terminationdate": "1654885125882",
+              "masked": "false",
+              "usertimezoneoffset": "UTC",
+              "disabledate": "1654885125882",
+              "createdate": "1651510308000",
+              "deletedate": "1654885125882",
+              "employeeid": "d1a97ba55e94fe907f08eeb08e0103dc",
+              "userid": "atuxhorn",
+              "u_terminationdate|1654885125882_u": "Fri Jun 10 18:18:45 UTC 2022",
+              "lastsynctime": "1651510309000",
+              "lastname": "Tuxhorn",
+              "updatedate": "1654885125882",
+              "u_deletedate|1654885125882_u": "Fri Jun 10 18:18:45 UTC 2022",
+              "tenantid": "2",
+              "usercriticality": "Low",
+              "u_disabledate|1654885125882_u": "Fri Jun 10 18:18:45 UTC 2022",
+              "workemail": "atuxhorn@securonix.com",
+              "tenantname": "a1t1sipi",
+              "fullname": "Addie Tuxhorn",
+              "u_status|1654885125882_u": "0",
+              "status": "0"
+            },
+            {
+              "userriskscore": "0.01",
+              "firstname": "Addie",
+              "masked": "false",
+              "usertimezoneoffset": "UTC",
+              "createdate": "1654885126000",
+              "employeeid": "atuxhorn",
+              "userid": "atuxhorn",
+              "lastname": "Tuxhorn",
+              "updatedate": "1654885443775",
+              "tenantid": "2",
+              "usercriticality": "Low",
+              "workemail": "atuxhorn@securonix.com",
+              "tenantname": "a1t1sipi",
+              "fullname": "Addie Tuxhorn",
+              "status": "1"
+            }
+          ],
+          "violations": [],
+          "violationsCount": 0,
+          "spotterUrl": "https://a1t1sipi.securonix.net/Snypr/spotter/loadDashboard",
+          "MAX_VIOLATION_RESULTS": 40,
+          "incidentsCount": 0,
+          "incidents": [],
+          "MAX_INCIDENTS_RESULTS": 40,
+          "incidentUrl": "https://a1t1sipi.securonix.net/Snypr/configurableDashboards/view?menuname=Incident Management&section=10"
+        }
+      }
+    }
+  ],
+  "msg": "Lookup Results",
+  "time": "2022-09-08T17:35:42.268Z",
+  "v": 0
+}

@@ -1,5 +1,8 @@
+const _ = require('lodash');
+
 const getUsersByEmail = async (entityGroups, options, requestWithDefaults, Logger) => {
-  if (Object.keys(entityGroups).includes('email')) {
+  Logger.trace({ entityGroups: 111111111, entityGroups });
+  if (_.get(entityGroups, 'email')) {
     try {
       const { email } = entityGroups;
       const response = await requestWithDefaults({
@@ -11,8 +14,7 @@ const getUsersByEmail = async (entityGroups, options, requestWithDefaults, Logge
         },
         json: true
       });
-      Logger.trace({ USER_BY_EMAIL: 111111111, response });
-      return response;
+      return response.body.events;
     } catch (err) {
       throw err;
     }

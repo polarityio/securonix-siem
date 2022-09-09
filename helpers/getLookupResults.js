@@ -7,6 +7,7 @@ const createLookupResults = require('./createLookupResults/index');
 const getViolationResponse = require('./getViolationResponse');
 const getIncidents = require('./getIncidents');
 const getUsersByEmailResponse = require('./createLookupResults/getUsersByEmail');
+const getTpiDomain = require('./createLookupResults/getTpiDomain');
 
 const getLookupResults = (entities, options, requestWithDefaults, Logger) =>
   _partitionFlatMap(
@@ -33,7 +34,14 @@ const getLookupResults = (entities, options, requestWithDefaults, Logger) =>
         Logger
       );
 
-      if (!(violationResponse || incidentsResponse || userByEmailResponse))
+      const tpiResponse = await getTpiDomain(
+        entityGroups,
+        options,
+        requestWithDefaults,
+        Logger
+      );
+
+      if (!(violationResponse || incidentsResponse || userByEmailResponse || tpiResponse))
         return _.map(entitiesPartition, (entity) => ({ entity, data: null }));
 
       Logger.trace({ violationResponse }, 'Violation Response');
@@ -42,8 +50,9 @@ const getLookupResults = (entities, options, requestWithDefaults, Logger) =>
         options.url,
         violationResponse,
         userByEmailResponse,
-        entityGroups,
         incidentsResponse,
+        tpiResponse,
+        entityGroups,
         Logger
       );
       return lookupResults;

@@ -31,8 +31,61 @@
         Incidents
       </a>
     </li>
+
+  {{/if}}
+  {{#if details.usersByEmails.users.length}}
+    <li class='nav-item'>
+      <a
+        {{action 'changeTab' 'usersByEmail'}}
+        class='nav-link {{if (eq activeTab "usersByEmail") "active"}}'
+        href='#'
+      >
+        Users
+      </a>
+    </li>
   {{/if}}
 </ul>
+
+{{#if (eq activeTab 'usersByEmail')}}
+  <div class='mb-1'>
+    {{#each details.usersByEmails.users as |user|}}
+      <h1 class='p-title'>
+        {{fa-icon 'info' fixedWidth=true}}
+        {{user.workemail}}
+      </h1>
+      {{#if user.firstname}}
+        <div>
+          <span class='p-key'>First Name:</span>
+          <span class='p-value'>{{user.firstname}}</span>
+        </div>
+      {{/if}}
+      {{#if user.lastname}}
+        <div>
+          <span class='p-key'>Last Name:</span>
+          <span class='p-value'>{{user.lastname}}</span>
+        </div>
+      {{/if}}
+      {{#if user.userriskscore}}
+        <div>
+          <span class='p-key'>Risk Score:</span>
+          <span class='p-value'>{{user.userriskscore}}</span>
+        </div>
+      {{/if}}
+      {{#if user.status}}
+        <div>
+          <span class='p-key'>Status:</span>
+          <span class='p-value'>{{user.status}}</span>
+        </div>
+      {{/if}}
+      {{#if user.usercriticality}}
+        <div>
+          <span class='p-key'>Criticality:</span>
+          <span class='p-value'>{{user.usercriticality}}</span>
+        </div>
+      {{/if}}
+    {{/each}}
+  </div>
+{{/if}}
 
 {{#if (eq activeTab 'violations')}}
   <div class='view-in-ts'>

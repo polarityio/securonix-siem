@@ -5,15 +5,21 @@ polarity.export = PolarityComponent.extend({
   }),
   watchListHasBeenCalled: false,
   watchLists: null,
-  activeTab: 'violations',
+  activeTab: '',
   expandableTitleStates: {
     allFields: {},
     datetime: {},
     watchList: {}
   },
   init () {
-    if (this.get('details.violations') && !this.get('details.violations').length)
-      this.set('activeTab', 'incidents');
+    this.set(
+      'activeTab',
+      this.get('details.usersByEmails.users.length')
+        ? 'usersByEmail'
+        : this.get('details.violations.length')
+        ? 'violations'
+        : 'associatedUsers'
+    );
 
     this._super(...arguments);
   },
@@ -44,6 +50,7 @@ polarity.export = PolarityComponent.extend({
       })
       .catch((err) => {
         // set message
+        console.log(err);
       })
       .finally(() => {
         this.set('watchListHasBeenCalled', true);
