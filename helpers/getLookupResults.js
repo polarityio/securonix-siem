@@ -6,18 +6,16 @@ const IGNORED_IPS = new Set(['127.0.0.1', '255.255.255.255', '0.0.0.0']);
 const createLookupResults = require('./createLookupResults/index');
 const getViolationResponse = require('./getViolationResponse');
 const getIncidents = require('./getIncidents');
-const getUsersByEmailResponse = require('./createLookupResults/getUsersByEmail');
-const getTpiDomain = require('./createLookupResults/getTpiDomain');
 
-const getLookupResults = (entities, options, requestWithDefaults, Logger) =>
-  _partitionFlatMap(
+const getLookupResults = async (entities, options, requestWithDefaults, Logger) => {
+  return _partitionFlatMap(
     async (entitiesPartition) => {
       const entityGroups = _groupEntities(entitiesPartition, options);
 
       if (_.isEmpty(entityGroups)) return [];
 
       const incidentsResponse = options.searchIncidents
-        ? await getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
+        ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
         : {};
 
       const violationResponse = await getViolationResponse(
@@ -27,39 +25,27 @@ const getLookupResults = (entities, options, requestWithDefaults, Logger) =>
         Logger
       );
 
-      const userByEmailResponse = await getUsersByEmailResponse(
-        entityGroups,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-
-      const tpiResponse = await getTpiDomain(
-        entityGroups,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-
-      if (!(violationResponse || incidentsResponse || userByEmailResponse || tpiResponse))
+      if (!(violationResponse || incidentsResponse))
         return _.map(entitiesPartition, (entity) => ({ entity, data: null }));
 
       Logger.trace({ violationResponse }, 'Violation Response');
 
-      const lookupResults = createLookupResults(
-        options.url,
+      const lookupResults = await createLookupResults(
+        options,
         violationResponse,
-        userByEmailResponse,
         incidentsResponse,
-        tpiResponse,
         entityGroups,
+        requestWithDefaults,
         Logger
       );
+      
+      Logger.trace({ LOOKUP_RESULTS: lookupResults });
       return lookupResults;
     },
     10,
     entities
   );
+};
 
 const _partitionFlatMap = (func, partitionSize, collection, parallelLimit = 10) =>
   _P

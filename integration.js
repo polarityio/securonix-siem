@@ -37,7 +37,6 @@ const doLookup = async (entities, options, cb) => {
     return cb(handleError(error));
   }
 
-  Logger.trace({ lookupResults }, 'Lookup Results');
   cb(null, lookupResults);
 };
 
@@ -70,3 +69,13 @@ module.exports = {
   onMessage,
   validateOptions
 };
+
+// **Watchlist - simple get request and list all of the responses back. Should be an onMessage button that then returns the watchlist information.
+
+// **Users - currently have associated users with violations however will need to query the user details by workemail
+
+// **TPI - query domains via tpi_domain
+
+// **Assets - Query assets by hostname and ips
+
+// **Risk history -- query user violation risks by workemail

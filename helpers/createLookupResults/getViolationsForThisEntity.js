@@ -1,9 +1,9 @@
-const _ = require("lodash");
-const { QUERY_KEYS } = require("../constants");
+const _ = require('lodash');
+
+const { QUERY_KEYS } = require('../constants');
 
 const getViolationsForThisEntity = (events, entity, entityGroupType) =>
   _.filter(events, _doesEventMatchThisEntity(entity, entityGroupType));
-
 const _doesEventMatchThisEntity = (entity, entityGroupType) => (violationEvent) =>
   QUERY_KEYS[entityGroupType].some((possibleEventKey) => {
     let eventIdValue = _.find(violationEvent, (v, k) => k.includes(possibleEventKey));
@@ -16,8 +16,8 @@ const _doesEventMatchThisEntity = (entity, entityGroupType) => (violationEvent) 
 
       const eventIdValueMightContainEntityValue =
         !eventIdValueMatchesEntityValue &&
-        entityGroupType === "domain" &&
-        (possibleEventKey === "destinationhostname" || possibleEventKey === "requesturl");
+        entityGroupType === 'domain' &&
+        (possibleEventKey === 'destinationhostname' || possibleEventKey === 'requesturl');
 
       const eventIdValueContainsEntityValue =
         eventIdValueMightContainEntityValue && eventIdValue.includes(entityValue);

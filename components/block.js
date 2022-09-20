@@ -25,6 +25,7 @@ polarity.export = PolarityComponent.extend({
   },
   actions: {
     changeTab: function (tabName) {
+      console.log(this.details)
       this.set('activeTab', tabName);
     },
     toggleExpandableTitle: function (index, type) {

@@ -1,5 +1,5 @@
 const fs = require('fs');
-const request = require('request');
+const request = require('postman-request');
 const config = require('../config/config');
 const getAuthToken = require('./getAuthToken');
 
@@ -148,7 +148,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     (r) => r,
     handleAndReformatErrors
   );
-  
+
   return requestDefaultsWithInterceptors;
 };
 

@@ -5,39 +5,109 @@ const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
 
 const { MAX_VIOLATION_RESULTS, MAX_INCIDENTS_RESULTS } = require('../constants');
+const getUsersByEmail = require('./getUsersByEmail');
+const getTpiDomain = require('./getTpiDomain');
+const getAssets = require('./getAssests');
+const getRiskHistory = require('./getRiskHistory');
 
-const createLookupResults = (
-  url,
+const createLookupResults = async (
+  options,
   { body: { events } },
-  users,
   incidents,
-  tpiResponse,
   entityGroups,
+  requestWithDefaults,
   Logger
-) =>
-  _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
-    groupEntities.map(
-      _getLookupResultForThisEntity(
-        url,
+) => {
+  const lookupResults = await Promise.all(
+    Object.entries(entityGroups).map(async ([entityGroupType, entities]) => {
+      const results = await _getLookupResultForThisEntity(
+        options,
         events,
-        users,
         incidents,
-        tpiResponse,
+        entities,
         entityGroupType,
+        requestWithDefaults,
         Logger
-      )
-    )
+      );
+      return results;
+    })
   );
+  return lookupResults;
+};
 
-const _getLookupResultForThisEntity = (
-  url,
+const _getLookupResultForThisEntity = async (
+  options,
   events,
-  users,
   foundIncidents,
-  tpiResponse,
+  entities,
   entityGroupType,
+  requestWithDefaults,
   Logger
-) => (entity) => {
+) => {
+  for (const entity of entities) {
+    const violations = await processesViolationResponse(
+      options,
+      entity,
+      entityGroupType,
+      events,
+      foundIncidents,
+      Logger
+    );
+    const usersByEmail = await getUsersByEmail(
+      options,
+      entity,
+      requestWithDefaults,
+      Logger
+    );
+    const tpiDomains = await getTpiDomain(options, entity, requestWithDefaults, Logger);
+
+    const assets = await getAssets(options, entity, requestWithDefaults, Logger);
+
+    const riskHistory = await getRiskHistory(
+      options,
+      entity,
+      requestWithDefaults,
+      Logger
+    );
+
+    const responses = {
+      ...violations,
+      ...usersByEmail,
+      ...tpiDomains,
+      ...assets,
+      ...riskHistory
+    };
+
+    return polarityResponse(entity, responses, Logger);
+  }
+};
+
+const polarityResponse = (entity, apiData, Logger) => {
+  // need to write conditions
+  return apiData.usersByEmail.users.length > 0
+    ? {
+        entity,
+        data: {
+          summary: [],
+          details: apiData
+        }
+      }
+    : emptyResponse(entity);
+};
+
+const emptyResponse = (entity) => ({
+  entity,
+  data: null
+});
+
+const processesViolationResponse = async (
+  options,
+  entity,
+  entityGroupType,
+  events,
+  foundIncidents,
+  Logger
+) => {
   const violationEventsForThisEntity = getViolationsForThisEntity(
     events,
     entity,
@@ -59,35 +129,26 @@ const _getLookupResultForThisEntity = (
 
   const incidents = foundIncidents[entity.value];
 
-  return {
-    entity,
-    data:
-      violationsCount || _.size(incidents) || _.size(users)
-        ? {
-            details: {
-              associatedUsers,
-              usersByEmails: {
-                users,
-                userCount: _.size(users)
-              },
-              violations: _.chain(violations)
-                .orderBy('violationCount', 'desc')
-                .slice(0, MAX_VIOLATION_RESULTS)
-                .value(),
-              violationsCount,
-              spotterUrl: `${url}/Snypr/spotter/loadDashboard`,
-              MAX_VIOLATION_RESULTS,
-              incidentsCount: _.size(incidents),
-              incidents: _.chain(incidents)
-                .orderBy('lastUpdateDate', 'desc')
-                .slice(0, MAX_INCIDENTS_RESULTS)
-                .value(),
-              MAX_INCIDENTS_RESULTS,
-              incidentUrl: `${url}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10`
-            }
-          }
-        : null
+  const response = {
+    associatedUsers,
+    violations: _.chain(violations)
+      .orderBy('violationCount', 'desc')
+      .slice(0, MAX_VIOLATION_RESULTS)
+      .value(),
+    violationsCount,
+    spotterUrl: `${options.url}/Snypr/spotter/loadDashboard`,
+    MAX_VIOLATION_RESULTS,
+    incidentsCount: _.size(incidents),
+    incidents: _.chain(incidents)
+      .orderBy('lastUpdateDate', 'desc')
+      .slice(0, MAX_INCIDENTS_RESULTS)
+      .value(),
+    MAX_INCIDENTS_RESULTS,
+    incidentUrl: `${options.url}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10`
   };
+
+  Logger.trace({ VIOLATION_RESPONSE: response });
+  return response;
 };
 
 module.exports = createLookupResults;

@@ -33,7 +33,7 @@
     </li>
 
   {{/if}}
-  {{#if details.usersByEmails.users.length}}
+  {{#if details.usersByEmail.users.length}}
     <li class='nav-item'>
       <a
         {{action 'changeTab' 'usersByEmail'}}
@@ -48,7 +48,7 @@
 
 {{#if (eq activeTab 'usersByEmail')}}
   <div class='mb-1'>
-    {{#each details.usersByEmails.users as |user|}}
+    {{#each details.usersByEmail.users as |user|}}
       <h1 class='p-title'>
         {{fa-icon 'info' fixedWidth=true}}
         {{user.workemail}}
