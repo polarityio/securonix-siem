@@ -1,9 +1,10 @@
 const _ = require('lodash');
 
 const getTpiDomain = async (options, entity, requestWithDefaults, Logger) => {
+  Logger.trace({ IN_TPI_DOMAIN: entity });
   try {
     const response = await requestWithDefaults({
-      uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=tpi AND tpi_domain=${entity.value}`,
+      uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=tpi AND tpi_ip=${entity.value}`,
       headers: {
         username: options.username,
         password: options.password,

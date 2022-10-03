@@ -1,154 +1,236 @@
 const _ = require('lodash');
+const {
+  flow,
+  keys,
+  some,
+  size,
+  get,
+  reduce,
+  orderBy,
+  slice,
+  capitalize,
+  filter,
+  toLower,
+  getOr,
+  includes,
+  map
+} = require('lodash/fp');
 
 const getViolationsForThisEntity = require('./getViolationsForThisEntity');
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
+const { getObjectsContainingString } = require('../dataTransformations');
 
-const { MAX_VIOLATION_RESULTS, MAX_INCIDENTS_RESULTS } = require('../constants');
-const getUsersByEmail = require('./getUsersByEmail');
-const getTpiDomain = require('./getTpiDomain');
-const getAssets = require('./getAssests');
-const getRiskHistory = require('./getRiskHistory');
+const { QUERY_SORT_KEYS, QUERY_KEYS } = require('../constants');
 
-const createLookupResults = async (
-  options,
-  { body: { events } },
-  incidents,
-  entityGroups,
-  requestWithDefaults,
-  Logger
-) => {
-  const lookupResults = await Promise.all(
-    Object.entries(entityGroups).map(async ([entityGroupType, entities]) => {
-      const results = await _getLookupResultForThisEntity(
-        options,
-        events,
-        incidents,
-        entities,
-        entityGroupType,
-        requestWithDefaults,
-        Logger
-      );
-      return results;
-    })
+const createLookupResults = async (options, queryResults, entityGroups, Logger) =>
+  _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
+    groupEntities.map(
+      _aggregateAndProcessResponses(options, queryResults, entityGroupType, Logger)
+    )
   );
-  return lookupResults;
-};
 
-const _getLookupResultForThisEntity = async (
+const _aggregateAndProcessResponses = (
   options,
-  events,
-  foundIncidents,
-  entities,
+  queryResults,
   entityGroupType,
-  requestWithDefaults,
   Logger
-) => {
-  for (const entity of entities) {
-    const violations = await processesViolationResponse(
-      options,
-      entity,
-      entityGroupType,
-      events,
-      foundIncidents,
-      Logger
-    );
-    const usersByEmail = await getUsersByEmail(
-      options,
-      entity,
-      requestWithDefaults,
-      Logger
-    );
-    const tpiDomains = await getTpiDomain(options, entity, requestWithDefaults, Logger);
-
-    const assets = await getAssets(options, entity, requestWithDefaults, Logger);
-
-    const riskHistory = await getRiskHistory(
-      options,
-      entity,
-      requestWithDefaults,
-      Logger
-    );
-
-    const responses = {
-      ...violations,
-      ...usersByEmail,
-      ...tpiDomains,
-      ...assets,
-      ...riskHistory
-    };
-
-    return polarityResponse(entity, responses, Logger);
-  }
-};
-
-const polarityResponse = (entity, apiData, Logger) => {
-  // need to write conditions
-  return apiData.usersByEmail.users.length > 0
-    ? {
-        entity,
-        data: {
-          summary: [],
-          details: apiData
-        }
-      }
-    : emptyResponse(entity);
-};
-
-const emptyResponse = (entity) => ({
-  entity,
-  data: null
-});
-
-const processesViolationResponse = async (
-  options,
-  entity,
-  entityGroupType,
-  events,
-  foundIncidents,
-  Logger
-) => {
-  const violationEventsForThisEntity = getViolationsForThisEntity(
-    events,
+) => (entity) => {
+  // Logger.trace({ ASDASDASDAS: 1231231231312 });
+  const queryResultsForThisEntity = getQueryResultsForThisEntity(
+    queryResults,
     entity,
-    entityGroupType
+    entityGroupType,
+    Logger
   );
 
-  const associatedUsers = getAssociatedUsers(violationEventsForThisEntity, Logger);
+  Logger.trace({ MADE_IT_HERE: 22222222, queryResultsForThisEntity });
+
+  // Logger.trace({ QUERY_RES_ENT: queryResultsForThisEntity });
+  const associatedUsers = getAssociatedUsers(
+    queryResultsForThisEntity.violations,
+    Logger
+  );
+  // Logger.trace({ QUERY_RES_ENT: 12312313212, queryResultsForThisEntity });
 
   const violations = getViolations(
     associatedUsers,
-    violationEventsForThisEntity,
+    queryResultsForThisEntity.violations,
     entityGroupType
   );
 
-  const violationsCount = violations.reduce(
-    (agg, violation) => agg + violation.violationCount,
-    0
-  );
+  Logger.trace({ QUERY_RES_ENT: 188888888, queryResultsForThisEntity });
 
-  const incidents = foundIncidents[entity.value];
+  const queryResultsAreFound = some(size, queryResultsForThisEntity);
 
-  const response = {
-    associatedUsers,
-    violations: _.chain(violations)
-      .orderBy('violationCount', 'desc')
-      .slice(0, MAX_VIOLATION_RESULTS)
-      .value(),
-    violationsCount,
-    spotterUrl: `${options.url}/Snypr/spotter/loadDashboard`,
-    MAX_VIOLATION_RESULTS,
-    incidentsCount: _.size(incidents),
-    incidents: _.chain(incidents)
-      .orderBy('lastUpdateDate', 'desc')
-      .slice(0, MAX_INCIDENTS_RESULTS)
-      .value(),
-    MAX_INCIDENTS_RESULTS,
-    incidentUrl: `${options.url}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10`
+  // Logger.trace({ QUERY_RESULT: 3333333, queryResults });
+  // Logger.trace({ QUERY_RESULT: 999999, queryResultsForThisEntity, queryResultsAreFound });
+
+  return {
+    entity,
+    data: queryResultsAreFound
+      ? {
+          summary: createSummaryTags(queryResultsForThisEntity, associatedUsers),
+          details: {
+            ...queryResultsForThisEntity,
+            violations,
+            associatedUsers
+          }
+        }
+      : null
   };
+};
 
-  Logger.trace({ VIOLATION_RESPONSE: response });
-  return response;
+const getQueryResultsForThisEntity = (queryResults, entity, entityType, Logger) =>
+  flow(
+    keys,
+    reduce((agg, queryResponseKey) => {
+      const queryResultsForThisKey = get(queryResponseKey, queryResults);
+      Logger.trace({ IN_QUERY_KEY: 111111, queryResultsForThisKey });
+
+      const allAssociatedQueryResults = getObjectsContainingString(
+        entity.value,
+        get('value', queryResultsForThisKey),
+        Logger
+      );
+
+      Logger.trace({ IN_GETQUERY: 222222, allAssociatedQueryResults });
+
+      const queryResultForThisEntity = filterQueryResultByQueryKey(
+        allAssociatedQueryResults,
+        entity,
+        entityType,
+        queryResponseKey,
+        Logger
+      );
+      Logger.trace({ IN_GETQUERY: 33333333, queryResultForThisEntity });
+
+      // Logger.trace({
+      //   QUERY_RESULT_FOR_THIS_ENTITY: 77777777777,
+      //   queryResultForThisEntity
+      // });
+
+      const sortedQueryResultsForThisEntity = sortQueryResults(
+        queryResults,
+        queryResultForThisEntity,
+        queryResponseKey,
+        Logger
+      );
+      // Logger.trace({ IN_GETQUERY: 44444 });
+
+      // Logger.trace({ SORTED: 100000000, sortedQueryResultsForThisEntity });
+
+      // Logger.trace({
+      //   QUERY_RESULT: 11111111,
+      //   queryResponseKey,
+      //   ALL_ASSOC: 222222,
+      //   allAssociatedQueryResults,
+      //   Q_RESULT_FOR_ENT: 33333,
+      //   queryResultForThisEntity,
+      //   SORTED: 4444444,
+      //   sortedQueryResultsForThisEntity,
+      //   AGG: 555555,
+      //   agg
+      // });
+
+      return {
+        ...agg,
+        [queryResponseKey]: sortedQueryResultsForThisEntity,
+        [`${queryResponseKey}MaxResultCount`]: getOr(
+          0,
+          [queryResponseKey, 'maxResultCount'],
+          queryResults
+        )
+      };
+    }, {})
+  )(queryResults);
+
+const filterQueryResultByQueryKey = (
+  allAssociatedQueryResults,
+  entity,
+  entityType,
+  queryResponseKey,
+  Logger
+) =>
+  filter((associatedQueryResult) => {
+    // Logger.trace({ ENTITY: entity })
+    Logger.trace({ All_ASSOCIATED_QUERY: 96767676767676, allAssociatedQueryResults });
+    const queryKeysForThisEntityType = get([queryResponseKey, entityType], QUERY_KEYS);
+
+    const entityValueIsAssociatedWithKey = some(
+      (queryKey) =>
+        flow(
+          getOr('', queryKey),
+          toLower,
+          includes(flow(get('value'), toLower)(entity))
+        )(associatedQueryResult),
+      queryKeysForThisEntityType
+    );
+
+    Logger.trace({
+      ASSOCIATED_QUERY_RESULT: 44444,
+      associatedQueryResult,
+      allAssociatedQueryResults,
+      queryResponseKey,
+      entityType,
+      queryKeysForThisEntityType,
+      entityValueIsAssociatedWithKey,
+      entity
+    });
+
+    
+
+    return entityValueIsAssociatedWithKey;
+  }, allAssociatedQueryResults);
+
+const createSummaryTags = (queryResultsForThisEntity, associatedUsers) => {
+  const countSummarytags = flow(
+    keys,
+    filter((key) => size(queryResultsForThisEntity[key])),
+    map((key) => `${capitalize(key)}: ${size(queryResultsForThisEntity[key])}`)
+  )(queryResultsForThisEntity);
+
+  const associatedUsersTag = size(associatedUsers)
+    ? `Associated Users: ${size(associatedUsers)}`
+    : [];
+
+  return [].concat(countSummarytags).concat(associatedUsersTag);
+};
+
+const sortQueryResults = (
+  queryResults,
+  queryResultForThisEntity,
+  queryResponseKey,
+  Logger
+) => {
+  const { direction, key, maxResultCount } = getOr({}, queryResponseKey, queryResults);
+  const sortedQueryResults = orderBy(key, direction, queryResultForThisEntity);
+  Logger.trace({
+    SORTED_QUERY_RESULTS: 88888888888888888888,
+    queryResults,
+    sortedQueryResults,
+    queryResultForThisEntity
+  });
+
+  const sortedLimitedResults = slice(0, maxResultCount, sortedQueryResults);
+
+  Logger.trace({
+    SORTED_QUERY_RESULTS: 99999999999999,
+    sortedLimitedResults
+  });
+
+  // Logger.trace({
+  //   SORTED_QUERY_RESULTS: 88888888888888888888,
+  //   queryResults,
+  //   queryResponseKey,
+  //   direction,
+  //   key,
+  //   maxResultCount,
+  //   sortQueryResults,
+  //   sortedLimitedResults
+  // });
+
+  return sortedLimitedResults;
 };
 
 module.exports = createLookupResults;

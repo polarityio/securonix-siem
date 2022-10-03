@@ -1,27 +1,24 @@
 const _ = require('lodash');
+const buildViolationQueryParams = require('../buildViolationQueryParams');
 
-const getUsersByEmail = async (options, entity, requestWithDefaults, Logger) => {
+const getUsersByEmail = async (entityGroups, options, requestWithDefaults, Logger) => {
   try {
     const response = await requestWithDefaults({
-      uri:
-        options.url +
-        `/Snypr/ws/spotter/index/search?query=index=users AND workemail=${entity.value}`,
+      uri: `${options.url}/Snypr/ws/spotter/index/search`,
       headers: {
         username: options.username,
         password: options.password,
         baseUrl: options.url
       },
+      qs: buildViolationQueryParams(entityGroups, options.monthsBack, 'users', Logger),
       json: true
     });
 
-    return {
-      usersByEmail: {
-        users: response.body.events,
-        userCount: _.size(response.body.events)
-      }
-    };
+    Logger.trace({ RESPONSE: 222222222222, response });
+
+    return _.get(response, 'body.events');
   } catch (err) {
-    Logger.trace({ ERR: err });
+    Logger.error({ TEST: 1231231231, err });
     throw err;
   }
 };

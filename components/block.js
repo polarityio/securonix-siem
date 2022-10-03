@@ -4,6 +4,7 @@ polarity.export = PolarityComponent.extend({
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
   watchListHasBeenCalled: false,
+  tabNames: ['violations', 'associatedUsers', 'incidents', 'users'],
   watchLists: null,
   activeTab: '',
   expandableTitleStates: {
@@ -12,20 +13,26 @@ polarity.export = PolarityComponent.extend({
     watchList: {}
   },
   init () {
-    this.set(
-      'activeTab',
-      this.get('details.usersByEmails.users.length')
-        ? 'usersByEmail'
-        : this.get('details.violations.length')
-        ? 'violations'
-        : 'associatedUsers'
-    );
+    // this.set(
+    //   'activeTab',
+    //   this.get('details.users.length')
+    //     ? 'users'
+    //     : this.get('details.violations.length')
+    //     ? 'violations'
+    //     : 'associatedUsers'
+    // );
+
+    const activeTab = this.tabNames
+      .filter((tabName) => this.get(`details.${tabName}.length`))
+      .shift();
+
+    this.set('activeTab', activeTab);
 
     this._super(...arguments);
   },
   actions: {
     changeTab: function (tabName) {
-      console.log(this.details)
+      console.log(this.details);
       this.set('activeTab', tabName);
     },
     toggleExpandableTitle: function (index, type) {

@@ -1,4 +1,5 @@
 const fs = require('fs');
+const { get } = require('lodash');
 const request = require('postman-request');
 const config = require('../config/config');
 const getAuthToken = require('./getAuthToken');
@@ -50,19 +51,29 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       try {
         const result = await _requestWithDefault(_requestOptions);
         Logger.trace({ RESULT: result });
-        checkForStatusError(result, _requestOptions);
-
+        // await checkForStatusError(result, _requestOptions);
+        // Logger.trace({ MADE_IT_PAST_CHECK: 12312313112 });
         postRequestFunctionResults = await postRequestSuccessFunction({
-          ...result,
-          body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
+          ...result
+          // body: result
         });
+
+        // postRequestFunctionResults = await postRequestSuccessFunction(
+        //   (result, Logger) => {
+        //     Logger.trace({ RESULTS_BODY: result.body });
+        //     return {
+        //       ...result,
+        //       body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
+        //     };
+        //   }
+        // );
       } catch (error) {
+        Logger.trace({ ERROR: error });
         postRequestFunctionResults = await postRequestFailureFunction(
           error,
           _requestOptions
         );
       }
-
       return postRequestFunctionResults;
     };
   };
@@ -117,8 +128,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     }
   };
 
-  const checkForStatusError = ({ statusCode, body }, requestOptions) => {
-    Logger.trace({ BODY: body });
+  const checkForStatusError = async ({ statusCode, body }, requestOptions) => {
     Logger.trace({
       requestOptions: {
         ...requestOptions,

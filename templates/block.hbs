@@ -1,54 +1,22 @@
 <ul class='nav nav-tabs'>
-  {{#if details.violations.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'violations'}}
-        class='nav-link {{if (or (eq activeTab "violations") (not activeTab)) "active"}}'
-        href='#'
-      >
-        Violations
-      </a>
-    </li>
-  {{/if}}
-  {{#if details.associatedUsers.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'associatedUsers'}}
-        class='nav-link {{if (eq activeTab "associatedUsers") "active"}}'
-        href='#'
-      >
-        Users
-      </a>
-    </li>
-  {{/if}}
-  {{#if details.incidents.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'incidents'}}
-        class='nav-link {{if (eq activeTab "incidents") "active"}}'
-        href='#'
-      >
-        Incidents
-      </a>
-    </li>
-
-  {{/if}}
-  {{#if details.usersByEmail.users.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'usersByEmail'}}
-        class='nav-link {{if (eq activeTab "usersByEmail") "active"}}'
-        href='#'
-      >
-        Users
-      </a>
-    </li>
-  {{/if}}
+  {{#each tabNames as |tabName|}}
+    {{#if (get details tabName 'length')}}
+      <li class='nav-item'>
+        <a
+          {{action 'changeTab' tabName}}
+          class='nav-link {{if (eq activeTab tabName) "active"}}'
+          href='#'
+        >
+          {{titleize (humanize (dasherize tabName))}}
+        </a>
+      </li>
+    {{/if}}
+  {{/each}}
 </ul>
 
-{{#if (eq activeTab 'usersByEmail')}}
+{{#if (eq activeTab 'users')}}
   <div class='mb-1'>
-    {{#each details.usersByEmail.users as |user|}}
+    {{#each details.users as |user|}}
       <h1 class='p-title'>
         {{fa-icon 'info' fixedWidth=true}}
         {{user.workemail}}
@@ -89,7 +57,8 @@
 
 {{#if (eq activeTab 'violations')}}
   <div class='view-in-ts'>
-    <a class='p-link' href={{details.spotterUrl}}>View in Securonix
+    <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
+      Securonix
       {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
   </div>
   <div class='mb-1'>
@@ -344,10 +313,10 @@
       {{/if}}
     {{/each}}
 
-    {{#if (gte details.violations.length details.MAX_VIOLATION_RESULTS)}}
+    {{#if (gte details.violations.length details.violationsMaxResultCount)}}
       <hr />
       <div class='view-in-ts end'>
-        <a class='p-link' href={{details.spotterUrl}}>
+        <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>
           ...Find all in Securonix
           {{fa-icon 'external-link-square' class='external-link-icon'}}
         </a>
@@ -358,7 +327,8 @@
 
 {{#if (eq activeTab 'associatedUsers')}}
   <div class='view-in-ts'>
-    <a class='p-link' href={{details.spotterUrl}}>View in Securonix
+    <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
+      Securonix
       {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
   </div>
   <div class='mb-1'>
@@ -504,7 +474,10 @@
 
 {{#if (eq activeTab 'incidents')}}
   <div class='view-in-ts'>
-    <a class='p-link' href={{details.incidentUrl}}>View in Securonix
+    <a
+      class='p-link'
+      href='{{block.userOptions.url}}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10'
+    >View in Securonix
       {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
   </div>
   <div class='mb-1'>
@@ -621,10 +594,13 @@
         </div>
       {{/if}}
     {{/each}}
-    {{#if (gte details.incidents.length details.MAX_INCIDENTS_RESULTS)}}
+    {{#if (gte details.incidents.length details.incidentsMaxResultCount)}}
       <hr />
       <div class='view-in-ts end'>
-        <a class='p-link' href={{details.incidentUrl}}>
+        <a
+          class='p-link'
+          href='{{block.userOptoins.url}}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10'
+        >
           ...Find all in Securonix
           {{fa-icon 'external-link-square' class='external-link-icon'}}
         </a>

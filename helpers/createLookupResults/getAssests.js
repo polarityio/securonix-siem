@@ -18,7 +18,7 @@ const getAssets = async (options, entity, requestWithDefaults, Logger) => {
       assetCount: _.size(response.body.events)
     };
   } catch (err) {
-    Logger.trace({ ERR: err });
+    Logger.error({ ERR: err });
     throw err;
   }
 };

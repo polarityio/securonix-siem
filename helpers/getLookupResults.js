@@ -6,6 +6,10 @@ const IGNORED_IPS = new Set(['127.0.0.1', '255.255.255.255', '0.0.0.0']);
 const createLookupResults = require('./createLookupResults/index');
 const getViolationResponse = require('./getViolationResponse');
 const getIncidents = require('./getIncidents');
+const getUsersByEmail = require('./createLookupResults/getUsersByEmail');
+// const getTpiDomain = require('./getTpiDomain');
+// const getAssets = require('./getAssests');
+// const getRiskHistory = require('./getRiskHistory');
 
 const getLookupResults = async (entities, options, requestWithDefaults, Logger) => {
   return _partitionFlatMap(
@@ -14,31 +18,85 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
 
       if (_.isEmpty(entityGroups)) return [];
 
-      const incidentsResponse = options.searchIncidents
+      const incidents = options.searchIncidents
         ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
         : {};
 
-      const violationResponse = await getViolationResponse(
+      const violations = await getViolationResponse(
         entityGroups,
         options,
         requestWithDefaults,
         Logger
       );
 
-      if (!(violationResponse || incidentsResponse))
-        return _.map(entitiesPartition, (entity) => ({ entity, data: null }));
+      Logger.trace({ VIOLATIONS: violations });
 
-      Logger.trace({ violationResponse }, 'Violation Response');
+      // const users = await getUsersByEmail(
+      //   entityGroups,
+      //   options,
+      //   requestWithDefaults,
+      //   Logger
+      // );
+
+      const users = [];
+
+      Logger.trace({ USERS: users });
+
+      // const tpiDomainsResponse = await getTpiDomain(
+      //   options,
+      //   entityGroups,
+      //   requestWithDefaults,
+      //   Logger
+      // );
+      // const assetsResponse = await getAssets(
+      //   options,
+      //   entityGroups,
+      //   requestWithDefaults,
+      //   Logger
+      // );
+      // const riskHistoryResponse = await getRiskHistory(
+      //   options,
+      //   entityGroups,
+      //   requestWithDefaults,
+      //   Logger
+      // );
+
+      if (!(violations || users || incidents))
+        return map(entitiesPartition, (entity) => ({ entity, data: null }));
+
+      Logger.trace({ violations }, 'Violation Response');
+
+      const responses = {
+        violations: {
+          value: violations,
+          direction: 'desc',
+          key: 'violationCount',
+          maxResultCount: 40
+        },
+        incidents: {
+          value: incidents,
+          direction: 'desc',
+          key: 'violationCount',
+          maxResultCount: 40
+        },
+        // tpiDomainsResponse,
+        users: {
+          value: users,
+          direction: 'desc',
+          key: 'violationCount',
+          maxResultCount: 40
+        }
+        // assetsResponse,
+        // riskHistoryResponse
+      };
 
       const lookupResults = await createLookupResults(
         options,
-        violationResponse,
-        incidentsResponse,
+        responses,
         entityGroups,
-        requestWithDefaults,
         Logger
       );
-      
+
       Logger.trace({ LOOKUP_RESULTS: lookupResults });
       return lookupResults;
     },

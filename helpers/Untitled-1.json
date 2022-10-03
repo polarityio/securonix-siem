@@ -1,0 +1,22 @@
+{
+  "name": "Securonix",
+  "hostname": "dev.polarity",
+  "pid": 29652,
+  "level": 10,
+  "requestOptions": {
+    "uri": "https://a1t1sipi.securonix.net/Snypr/ws/spotter/index/search",
+    "headers": {
+      "username": "access-user-004",
+      "password": "ND%ZmMTYwMGM3M2QwNmZjMzMzODQ3ZDY3",
+      "baseUrl": "https://a1t1sipi.securonix.net",
+      "token": "************"
+    },
+    "qs": { "query": "index=users AND ( OR  OR )" },
+    "options": "************"
+  },
+  "statusCode": 200,
+  "body": "{\n  \"totalDocuments\": 0,\n  \"error\": true,\n  \"errorMessage\": \"Error searching in Spotter :[SYNTAX_ERROR] An error occured while parsing query. Check the query for correct syntax.\",\n  \"available\": false,\n  \"inputParams\": {\n    \"query\": \"index=users AND ( OR  OR )\"\n  },\n  \"index\": \"users\"\n}",
+  "msg": "",
+  "time": "2022-09-28T15:17:08.541Z",
+  "v": 0
+}
