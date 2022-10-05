@@ -5,7 +5,6 @@ const { flow, join, map, flatten, get, compact } = require('lodash/fp');
 const mapObj = require('lodash/fp/map').convert({ cap: false });
 
 const buildViolationQueryParams = (entityGroups, monthsBack, index, Logger, dateTo) => {
-  Logger.trace({ ENTITY_GROUPS: entityGroups });
   return {
     query: _buildSecuronixQuery(entityGroups, index, Logger),
     ..._getTimeframeParams(monthsBack, dateTo)

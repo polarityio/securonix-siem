@@ -18,30 +18,26 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
 
       if (_.isEmpty(entityGroups)) return [];
 
-      const incidents = options.searchIncidents
-        ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
-        : {};
+      // const incidents = options.searchIncidents
+      //   ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
+      //   : {};
 
-      const violations = await getViolationResponse(
-        entityGroups,
-        options,
-        requestWithDefaults,
-        Logger
-      );
-
-      Logger.trace({ VIOLATIONS: violations });
-
-      // const users = await getUsersByEmail(
+      // const violations = await getViolationResponse(
       //   entityGroups,
       //   options,
       //   requestWithDefaults,
       //   Logger
       // );
 
-      const users = [];
+      const users = await getUsersByEmail(
+        entityGroups,
+        options,
+        requestWithDefaults,
+        Logger
+      );
 
-      Logger.trace({ USERS: users });
-
+      const incidents = [];
+      const violations = [];
       // const tpiDomainsResponse = await getTpiDomain(
       //   options,
       //   entityGroups,
@@ -67,7 +63,7 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
       Logger.trace({ violations }, 'Violation Response');
 
       const responses = {
-        violations: {
+        violation: {
           value: violations,
           direction: 'desc',
           key: 'violationCount',

@@ -14,7 +14,7 @@ const getUsersByEmail = async (entityGroups, options, requestWithDefaults, Logge
       json: true
     });
 
-    Logger.trace({ RESPONSE: 222222222222, response });
+    Logger.trace({ RESPONSE_USER_EMAIL: 3333333, response });
 
     return _.get(response, 'body.events');
   } catch (err) {

@@ -36,7 +36,6 @@ const _aggregateAndProcessResponses = (
   entityGroupType,
   Logger
 ) => (entity) => {
-  // Logger.trace({ ASDASDASDAS: 1231231231312 });
   const queryResultsForThisEntity = getQueryResultsForThisEntity(
     queryResults,
     entity,
@@ -44,27 +43,15 @@ const _aggregateAndProcessResponses = (
     Logger
   );
 
-  Logger.trace({ MADE_IT_HERE: 22222222, queryResultsForThisEntity });
-
-  // Logger.trace({ QUERY_RES_ENT: queryResultsForThisEntity });
-  const associatedUsers = getAssociatedUsers(
-    queryResultsForThisEntity.violations,
-    Logger
-  );
-  // Logger.trace({ QUERY_RES_ENT: 12312313212, queryResultsForThisEntity });
+  const associatedUsers = getAssociatedUsers(queryResultsForThisEntity.violation, Logger);
 
   const violations = getViolations(
     associatedUsers,
-    queryResultsForThisEntity.violations,
+    queryResultsForThisEntity.violation,
     entityGroupType
   );
 
-  Logger.trace({ QUERY_RES_ENT: 188888888, queryResultsForThisEntity });
-
   const queryResultsAreFound = some(size, queryResultsForThisEntity);
-
-  // Logger.trace({ QUERY_RESULT: 3333333, queryResults });
-  // Logger.trace({ QUERY_RESULT: 999999, queryResultsForThisEntity, queryResultsAreFound });
 
   return {
     entity,
@@ -86,15 +73,11 @@ const getQueryResultsForThisEntity = (queryResults, entity, entityType, Logger) 
     keys,
     reduce((agg, queryResponseKey) => {
       const queryResultsForThisKey = get(queryResponseKey, queryResults);
-      Logger.trace({ IN_QUERY_KEY: 111111, queryResultsForThisKey });
-
       const allAssociatedQueryResults = getObjectsContainingString(
         entity.value,
         get('value', queryResultsForThisKey),
         Logger
       );
-
-      Logger.trace({ IN_GETQUERY: 222222, allAssociatedQueryResults });
 
       const queryResultForThisEntity = filterQueryResultByQueryKey(
         allAssociatedQueryResults,
@@ -103,12 +86,6 @@ const getQueryResultsForThisEntity = (queryResults, entity, entityType, Logger) 
         queryResponseKey,
         Logger
       );
-      Logger.trace({ IN_GETQUERY: 33333333, queryResultForThisEntity });
-
-      // Logger.trace({
-      //   QUERY_RESULT_FOR_THIS_ENTITY: 77777777777,
-      //   queryResultForThisEntity
-      // });
 
       const sortedQueryResultsForThisEntity = sortQueryResults(
         queryResults,
@@ -116,22 +93,6 @@ const getQueryResultsForThisEntity = (queryResults, entity, entityType, Logger) 
         queryResponseKey,
         Logger
       );
-      // Logger.trace({ IN_GETQUERY: 44444 });
-
-      // Logger.trace({ SORTED: 100000000, sortedQueryResultsForThisEntity });
-
-      // Logger.trace({
-      //   QUERY_RESULT: 11111111,
-      //   queryResponseKey,
-      //   ALL_ASSOC: 222222,
-      //   allAssociatedQueryResults,
-      //   Q_RESULT_FOR_ENT: 33333,
-      //   queryResultForThisEntity,
-      //   SORTED: 4444444,
-      //   sortedQueryResultsForThisEntity,
-      //   AGG: 555555,
-      //   agg
-      // });
 
       return {
         ...agg,
@@ -153,8 +114,6 @@ const filterQueryResultByQueryKey = (
   Logger
 ) =>
   filter((associatedQueryResult) => {
-    // Logger.trace({ ENTITY: entity })
-    Logger.trace({ All_ASSOCIATED_QUERY: 96767676767676, allAssociatedQueryResults });
     const queryKeysForThisEntityType = get([queryResponseKey, entityType], QUERY_KEYS);
 
     const entityValueIsAssociatedWithKey = some(
@@ -177,8 +136,6 @@ const filterQueryResultByQueryKey = (
       entityValueIsAssociatedWithKey,
       entity
     });
-
-    
 
     return entityValueIsAssociatedWithKey;
   }, allAssociatedQueryResults);
@@ -205,31 +162,7 @@ const sortQueryResults = (
 ) => {
   const { direction, key, maxResultCount } = getOr({}, queryResponseKey, queryResults);
   const sortedQueryResults = orderBy(key, direction, queryResultForThisEntity);
-  Logger.trace({
-    SORTED_QUERY_RESULTS: 88888888888888888888,
-    queryResults,
-    sortedQueryResults,
-    queryResultForThisEntity
-  });
-
   const sortedLimitedResults = slice(0, maxResultCount, sortedQueryResults);
-
-  Logger.trace({
-    SORTED_QUERY_RESULTS: 99999999999999,
-    sortedLimitedResults
-  });
-
-  // Logger.trace({
-  //   SORTED_QUERY_RESULTS: 88888888888888888888,
-  //   queryResults,
-  //   queryResponseKey,
-  //   direction,
-  //   key,
-  //   maxResultCount,
-  //   sortQueryResults,
-  //   sortedLimitedResults
-  // });
-
   return sortedLimitedResults;
 };
 
