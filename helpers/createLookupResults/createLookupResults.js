@@ -36,6 +36,7 @@ const _aggregateAndProcessResponses = (
   entityGroupType,
   Logger
 ) => (entity) => {
+  Logger.trace({ QUERY_RESULTS: queryResults });
   const queryResultsForThisEntity = getQueryResultsForThisEntity(
     queryResults,
     entity,

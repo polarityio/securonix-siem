@@ -22,22 +22,26 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
       //   ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
       //   : {};
 
-      // const violations = await getViolationResponse(
-      //   entityGroups,
-      //   options,
-      //   requestWithDefaults,
-      //   Logger
-      // );
-
-      const users = await getUsersByEmail(
+      Logger.trace({ LOG_HERE: 9123909128301 });
+      const violations = await getViolationResponse(
         entityGroups,
         options,
         requestWithDefaults,
         Logger
       );
 
+      Logger.trace({ VIOLATION: violations });
+
+      // const users = await getUsersByEmail(
+      //   entityGroups,
+      //   options,
+      //   requestWithDefaults,
+      //   Logger
+      // );
+
       const incidents = [];
-      const violations = [];
+      // const violations = [];
+      const users = [];
       // const tpiDomainsResponse = await getTpiDomain(
       //   options,
       //   entityGroups,
@@ -135,3 +139,5 @@ module.exports = {
   getLookupResults,
   _groupEntities
 };
+
+// I think its the nested arrays around ips

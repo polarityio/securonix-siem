@@ -11,6 +11,7 @@ const { getLookupResults } = require('./helpers/getLookupResults');
 
 let Logger;
 let requestWithDefaults;
+
 const tokenCache = new NodeCache({
   stdTTL: TIME_FOR_TOKEN_DAYS * 24 * 60 * 60 - 8000, //Token lasts Token length days
   checkperiod: 24 * 60 * 60 //Check if Expired once a day
@@ -80,7 +81,6 @@ module.exports = {
 
 // **Risk history -- query user violation risks by workemail
 
-
 // Riskscore
 // resourcegroupid
 // resourcename
@@ -91,12 +91,12 @@ module.exports = {
 // tpi_ip
 // tpi_malware
 
-// Also, running the following spotter queries for a time range for all time would give you the list of riskscore, riskscorehistory and TPI data present in the environment. Then, depending on the results and your development needs you can make web requests accordingly. 
+// Also, running the following spotter queries for a time range for all time would give you the list of riskscore, riskscorehistory and TPI data present in the environment. Then, depending on the results and your development needs you can make web requests accordingly.
 
 // index = tpi
 // index = riskscore
 // index = riskscorehistory
-// In conclusion,  you would have to modify the requests according to the attributes present in this test environment. For example, 
+// In conclusion,  you would have to modify the requests according to the attributes present in this test environment. For example,
 
 // risk history: https://a1t1sipi.securonix.net/Snypr/ws/spotter/index/search?query=index=riskscore AND entityid={{entityid}}
 // tpi: https://a1t1sipi.securonix.net/Snypr/ws/spotter/index/search?query=index=tpi AND tpi_ip={{ipaddress}}

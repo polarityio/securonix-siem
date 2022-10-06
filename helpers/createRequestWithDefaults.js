@@ -51,13 +51,15 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       let postRequestFunctionResults;
       try {
         const result = await _requestWithDefault(_requestOptions);
-
+        // Logger.trace({ RESULT: result });
+        // Logger.trace({ RESULT_2: 'HERE' });
         checkForStatusError(result, _requestOptions);
-
+        Logger.trace({ LOG_IN_CREATE: 87698769876 });
         postRequestFunctionResults = await postRequestSuccessFunction({
           ...result,
           body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
         });
+        Logger.trace({ LOG_IN_CREATE: 999999999999 });
       } catch (error) {
         postRequestFunctionResults = await postRequestFailureFunction(
           error,
@@ -119,25 +121,14 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     }
   };
 
-  const checkForStatusError = ({ statusCode, body }, requestOptions) => {
-    Logger.trace({
-      requestOptions: {
-        ...requestOptions,
-        headers: {
-          ...requestOptions.headers,
-          token: '************'
-        },
-        options: '************'
-      },
-      statusCode,
-      body
-    });
+  const checkForStatusError = (result, requestOptions) => {
+    Logger.trace({ IN_CHECK_FOR_STATUS: 555555555555 });
 
-    const roundedStatus = Math.round(statusCode / 100) * 100;
+    const roundedStatus = Math.round(result.statusCode / 100) * 100;
     if (!SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(roundedStatus)) {
       const requestError = Error('Request Error');
-      requestError.status = statusCode;
-      requestError.description = JSON.stringify(body);
+      requestError.status = result.statusCode;
+      requestError.description = JSON.stringify(result.body);
       requestError.requestOptions = JSON.stringify(requestOptions);
       throw requestError;
     }
