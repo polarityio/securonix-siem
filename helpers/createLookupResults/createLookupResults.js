@@ -16,12 +16,11 @@ const {
   map
 } = require('lodash/fp');
 
-const getViolationsForThisEntity = require('./getViolationsForThisEntity');
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
 const { getObjectsContainingString } = require('../dataTransformations');
 
-const { QUERY_SORT_KEYS, QUERY_KEYS } = require('../constants');
+const { QUERY_KEYS } = require('../constants');
 
 const createLookupResults = async (options, queryResults, entityGroups, Logger) =>
   _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
@@ -126,17 +125,6 @@ const filterQueryResultByQueryKey = (
         )(associatedQueryResult),
       queryKeysForThisEntityType
     );
-
-    Logger.trace({
-      ASSOCIATED_QUERY_RESULT: 44444,
-      associatedQueryResult,
-      allAssociatedQueryResults,
-      queryResponseKey,
-      entityType,
-      queryKeysForThisEntityType,
-      entityValueIsAssociatedWithKey,
-      entity
-    });
 
     return entityValueIsAssociatedWithKey;
   }, allAssociatedQueryResults);

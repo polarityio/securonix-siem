@@ -1,7 +1,7 @@
 const { get } = require('lodash/fp');
 const buildViolationQueryParams = require('../buildViolationQueryParams');
 
-const getUsersByEmail = async (entityGroups, options, requestWithDefaults, Logger) => {
+const getTpi = async (options, entityGroups, requestWithDefaults, Logger) => {
   try {
     const response = await requestWithDefaults({
       uri: `${options.url}/Snypr/ws/spotter/index/search`,
@@ -10,16 +10,16 @@ const getUsersByEmail = async (entityGroups, options, requestWithDefaults, Logge
         password: options.password,
         baseUrl: options.url
       },
-      qs: buildViolationQueryParams(entityGroups, 'users', Logger),
+      qs: buildViolationQueryParams(entityGroups, options.monthsBack, 'tpi', Logger),
       json: true
     });
-    Logger.trace({ response }, 'getUsersByEmail response');
+    Logger.trace({ response }, 'Tpi response');
 
     return get('body.events', response);
   } catch (err) {
-    Logger.error({ ERR: err });
+    Logger.error({ ERR: err }, 'error in tpi request');
     throw err;
   }
 };
 
-module.exports = getUsersByEmail;
+module.exports = getTpi;

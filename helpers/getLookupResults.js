@@ -7,9 +7,9 @@ const createLookupResults = require('./createLookupResults/index');
 const getViolationResponse = require('./getViolationResponse');
 const getIncidents = require('./getIncidents');
 const getUsersByEmail = require('./createLookupResults/getUsersByEmail');
-// const getTpiDomain = require('./getTpiDomain');
-// const getAssets = require('./getAssests');
-// const getRiskHistory = require('./getRiskHistory');
+const getTpi = require('./createLookupResults/getTpi');
+const getRiskHistory = require('./createLookupResults/getRiskHistory');
+const getAssets = require('./createLookupResults/getAssests');
 
 const getLookupResults = async (entities, options, requestWithDefaults, Logger) => {
   return _partitionFlatMap(
@@ -18,53 +18,43 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
 
       if (_.isEmpty(entityGroups)) return [];
 
-      // const incidents = options.searchIncidents
-      //   ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
-      //   : {};
+      const incidents = options.searchIncidents
+        ? getIncidents(entitiesPartition, options, requestWithDefaults, Logger)
+        : {};
+      Logger.trace({ incidents }, 'incidents response');
 
-      Logger.trace({ LOG_HERE: 9123909128301 });
       const violations = await getViolationResponse(
         entityGroups,
         options,
         requestWithDefaults,
         Logger
       );
+      Logger.trace({ violations }, 'violations response');
 
-      Logger.trace({ VIOLATION: violations });
+      const users = await getUsersByEmail(
+        entityGroups,
+        options,
+        requestWithDefaults,
+        Logger
+      );
+      Logger.trace({ users }, 'users response');
 
-      // const users = await getUsersByEmail(
-      //   entityGroups,
-      //   options,
-      //   requestWithDefaults,
-      //   Logger
-      // );
+      const tpi = await getTpi(options, entityGroups, requestWithDefaults, Logger);
+      Logger.trace({ tpi }, 'tpi response');
 
-      const incidents = [];
-      // const violations = [];
-      const users = [];
-      // const tpiDomainsResponse = await getTpiDomain(
-      //   options,
-      //   entityGroups,
-      //   requestWithDefaults,
-      //   Logger
-      // );
-      // const assetsResponse = await getAssets(
-      //   options,
-      //   entityGroups,
-      //   requestWithDefaults,
-      //   Logger
-      // );
-      // const riskHistoryResponse = await getRiskHistory(
-      //   options,
-      //   entityGroups,
-      //   requestWithDefaults,
-      //   Logger
-      // );
+      const assets = await getAssets(entityGroups, options, requestWithDefaults, Logger);
+      Logger.trace({ assets }, 'assets response');
 
-      if (!(violations || users || incidents))
+      const riskHistory = await getRiskHistory(
+        options,
+        entityGroups,
+        requestWithDefaults,
+        Logger
+      );
+      Logger.trace({ riskHistory }, 'riskHistory response');
+
+      if (!(violations || users || incidents || tpi || riskHistory || assets))
         return map(entitiesPartition, (entity) => ({ entity, data: null }));
-
-      Logger.trace({ violations }, 'Violation Response');
 
       const responses = {
         violation: {
@@ -76,18 +66,33 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
         incidents: {
           value: incidents,
           direction: 'desc',
-          key: 'violationCount',
+          key: 'incidentsCount',
           maxResultCount: 40
         },
-        // tpiDomainsResponse,
+        tpi: {
+          value: tpi,
+          direction: 'desc',
+          key: 'tpiIpCount',
+          maxResultCount: 40
+        },
         users: {
           value: users,
           direction: 'desc',
-          key: 'violationCount',
+          key: 'usersCount',
+          maxResultCount: 40
+        },
+        riskhistory: {
+          value: riskHistory,
+          direction: 'desc',
+          key: 'riskHistoryCount',
+          maxResultCount: 40
+        },
+        assets: {
+          value: assets,
+          direction: 'desc',
+          key: 'usersCount',
           maxResultCount: 40
         }
-        // assetsResponse,
-        // riskHistoryResponse
       };
 
       const lookupResults = await createLookupResults(
@@ -97,7 +102,6 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
         Logger
       );
 
-      Logger.trace({ LOOKUP_RESULTS: lookupResults });
       return lookupResults;
     },
     10,
@@ -139,5 +143,3 @@ module.exports = {
   getLookupResults,
   _groupEntities
 };
-
-// I think its the nested arrays around ips

@@ -92,25 +92,18 @@ const QUERY_KEYS = {
   },
   users: {
     email: ['workemail']
+  },
+  tpi: {
+    ip: ['tpi_ip', 'tpi_domain']
+  },
+  riskscore: {
+    email: ['workemail']
+  },
+  asset: {
+    // hostname: [],
+    ip: ['key_ip']
   }
 };
-
-// const QUERY_KEYS = {
-//   ip: ['ipaddress'],
-//   email: ['workemail'],
-//   domain: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl'],
-//   string: ['employeeid', 'accountname', 'lanid', 'sourceusername'],
-//   username: [
-//     'employeeid',
-//     'accountname',
-//     'lanid',
-//     'sourceusername',
-//     'accountname',
-//     'tenantname'
-//   ],
-//   hostname: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl'],
-//   email: ['workemail']
-// };
 
 const INCIDENT_QUERY_PATHS = [
   'violatorText',
