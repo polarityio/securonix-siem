@@ -97,7 +97,7 @@ const QUERY_KEYS = {
     ip: ['tpi_ip', 'tpi_domain']
   },
   riskscore: {
-    email: ['workemail']
+    email: ['workemail', 'entityid']
   },
   asset: {
     // hostname: [],

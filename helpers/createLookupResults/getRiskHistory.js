@@ -4,13 +4,13 @@ const buildViolationQueryParams = require('../buildViolationQueryParams');
 const getRiskHistory = async (entityGroups, options, requestWithDefaults, Logger) => {
   try {
     const response = await requestWithDefaults({
-      uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=riskscorehistory`,
+      uri: `${options.url}/Snypr/ws/spotter/index/search`,
       headers: {
         username: options.username,
         password: options.password,
         baseUrl: options.url
       },
-      // qs: buildViolationQueryParams(entityGroups, 'riskscore', Logger),
+      qs: buildViolationQueryParams(entityGroups, 'riskscore', Logger),
       json: true
     });
     Logger.trace({ response }, 'getRiskHistory response');

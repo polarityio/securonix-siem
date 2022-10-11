@@ -4,13 +4,13 @@ const buildViolationQueryParams = require('../buildViolationQueryParams');
 const getTpi = async (entityGroups, options, requestWithDefaults, Logger) => {
   try {
     const response = await requestWithDefaults({
-      uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=tpi AND tpi_ip=99.83.154.118`,
+      uri: `${options.url}/Snypr/ws/spotter/index/search`,
       headers: {
         username: options.username,
         password: options.password,
         baseUrl: options.url
       },
-      // qs: buildViolationQueryParams(entityGroups, options.monthsBack, 'tpi', Logger),
+      qs: buildViolationQueryParams(entityGroups, 'tpi', Logger),
       json: true
     });
     Logger.trace({ response }, 'Tpi response');
