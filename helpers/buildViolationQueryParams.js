@@ -7,7 +7,7 @@ const mapObj = require('lodash/fp/map').convert({ cap: false });
 const buildViolationQueryParams = (entityGroups, index, Logger) => {
   return {
     query: _buildSecuronixQuery(entityGroups, index, Logger),
-    max: 10
+    max: 5
   };
 };
 

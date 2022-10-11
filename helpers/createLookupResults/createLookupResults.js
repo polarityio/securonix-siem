@@ -42,6 +42,7 @@ const _aggregateAndProcessResponses = (
     entityGroupType,
     Logger
   );
+  // tpi is is not returning because the entity value will not be found in the API response
 
   const associatedUsers = getAssociatedUsers(queryResultsForThisEntity.violation, Logger);
 

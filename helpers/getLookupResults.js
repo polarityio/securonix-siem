@@ -39,15 +39,15 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
       );
       Logger.trace({ users }, 'users response');
 
-      const tpi = await getTpi(options, entityGroups, requestWithDefaults, Logger);
+      const tpi = await getTpi(entityGroups, options, requestWithDefaults, Logger);
       Logger.trace({ tpi }, 'tpi response');
 
       const assets = await getAssets(entityGroups, options, requestWithDefaults, Logger);
       Logger.trace({ assets }, 'assets response');
 
       const riskHistory = await getRiskHistory(
-        options,
         entityGroups,
+        options,
         requestWithDefaults,
         Logger
       );

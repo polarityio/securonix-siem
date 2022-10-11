@@ -1,22 +1,21 @@
-const _ = require('lodash');
+const { get } = require('lodash/fp');
+const buildViolationQueryParams = require('../buildViolationQueryParams');
 
-const getRiskHistory = async (options, entity, requestWithDefaults, Logger) => {
+const getRiskHistory = async (entityGroups, options, requestWithDefaults, Logger) => {
   try {
     const response = await requestWithDefaults({
-      uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=riskscore AND workemail=${entity.value}`,
+      uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=riskscorehistory`,
       headers: {
         username: options.username,
         password: options.password,
         baseUrl: options.url
       },
+      // qs: buildViolationQueryParams(entityGroups, 'riskscore', Logger),
       json: true
     });
+    Logger.trace({ response }, 'getRiskHistory response');
 
-    Logger.trace({ RISKS: response });
-    return {
-      risks: response.body.events,
-      riskCount: _.size(response.body.events)
-    };
+    return get('body.events', response);
   } catch (err) {
     Logger.trace({ ERR: err });
     throw err;
