@@ -4,7 +4,7 @@ polarity.export = PolarityComponent.extend({
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
   watchListHasBeenCalled: false,
-  tabNames: ['violations', 'associatedUsers', 'incidents', 'users'],
+  tabNames: ['violations', 'associatedUsers', 'incidents', 'users', 'riskscore', 'tpi'],
   watchLists: null,
   activeTab: '',
   expandableTitleStates: {
@@ -13,15 +13,6 @@ polarity.export = PolarityComponent.extend({
     watchList: {}
   },
   init () {
-    // this.set(
-    //   'activeTab',
-    //   this.get('details.users.length')
-    //     ? 'users'
-    //     : this.get('details.violations.length')
-    //     ? 'violations'
-    //     : 'associatedUsers'
-    // );
-
     const activeTab = this.tabNames
       .filter((tabName) => this.get(`details.${tabName}.length`))
       .shift();

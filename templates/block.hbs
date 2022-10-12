@@ -14,63 +14,111 @@
   {{/each}}
 </ul>
 
-{{#if details.tpi}}
-  <div class='mb-1'>
-    <div class='view-in-ts'>
-      <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View
-        in Securonix
-        {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
+{{#if (eq activeTab 'riskscore')}}
+  {{#if details.riskscore}}
+    <div class='mb-1'>
+      <div class='view-in-ts'>
+        <a
+          class='p-link'
+          href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'
+        >View in Securonix
+          {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
+      </div>
+      {{#each details.riskscore as |riskscore|}}
+        <h1 class='p-title'>
+          {{fa-icon 'arrow-right' fixedWidth=true}}
+          Risk Score
+          {{riskscore.riskscore}}
+        </h1>
+        {{#if riskscore.riskthreatname}}
+          <div>
+            <span class='p-key'>Riskscore:</span>
+            <span class='p-value'>{{riskscore.riskthreatname}}</span>
+          </div>
+        {{/if}}
+        {{#if riskscore.policyname}}
+          <div>
+            <span class='p-key'>Policy Name:</span>
+            <span class='p-value'>{{riskscore.policyname}}</span>
+          </div>
+        {{/if}}
+        {{#if riskscore.violator}}
+          <div>
+            <span class='p-key'>Violator:</span>
+            <span class='p-value'>{{riskscore.violator}}</span>
+          </div>
+        {{/if}}
+        {{#if riskscore.lastgeneratetime}}
+          <div>
+            <span class='p-key'>Last Generation Time:</span>
+            <span class='p-value'>{{riskscore.lastgeneratetime}}</span>
+          </div>
+        {{/if}}
+      {{/each}}
     </div>
-    
-    {{#each details.tpi as |tpi|}}
-      <h1 class='p-title'>
-        {{fa-icon 'info' fixedWidth=true}}
-        {{tpi.tpi_ip}}
-      </h1>
-      {{#if tpi.tpi_criticality}}
-        <div>
-          <span class='p-key'>TPI Criticality:</span>
-          <span class='p-value'>{{tpi.tpi_criticality}}</span>
-        </div>
-      {{/if}}
-      {{#if tpi.tpi_risk}}
-        <div>
-          <span class='p-key'>TPI Risk:</span>
-          <span class='p-value'>{{tpi.tpi_risk}}</span>
-        </div>
-      {{/if}}
-      {{#if tpi.tpi_malware}}
-        <div>
-          <span class='p-key'>TPI Malware:</span>
-          <span class='p-value'>{{tpi.malware}}</span>
-        </div>
-      {{/if}}
-      {{#if tpi.tpi_type}}
-        <div>
-          <span class='p-key'>TPI Type:</span>
-          <span class='p-value'>{{tpi.tpi_type}}</span>
-        </div>
-      {{/if}}
-      {{#if tpi.tpi_src}}
-        <div>
-          <span class='p-key'>TPI Source:</span>
-          <span class='p-value'>{{tpi.tpi_src}}</span>
-        </div>
-      {{/if}}
-      {{#if tpi.tpi_src_organization}}
-        <div>
-          <span class='p-key'>TPI Source Org.:</span>
-          <span class='p-value'>{{tpi.tpi_source_organization}}</span>
-        </div>
-      {{/if}}
-      {{#if tpi.tenantname}}
-        <div>
-          <span class='p-key'>Tenant Name:</span>
-          <span class='p-value'>{{tpi.tenantname}}</span>
-        </div>
-      {{/if}}
-    {{/each}}
-  </div>
+  {{/if}}
+{{/if}}
+
+{{#if (eq activeTab 'tpi')}}
+  {{#if details.tpi}}
+    <div class='mb-1'>
+      <div class='view-in-ts'>
+        <a
+          class='p-link'
+          href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'
+        >View in Securonix
+          {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
+      </div>
+      {{#each details.tpi as |tpi|}}
+        <h1 class='p-title'>
+          {{fa-icon 'info' fixedWidth=true}}
+          {{tpi.tpi_ip}}
+        </h1>
+        {{#if tpi.tpi_criticality}}
+          <div>
+            <span class='p-key'>TPI Criticality:</span>
+            <span class='p-value'>{{tpi.tpi_criticality}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_risk}}
+          <div>
+            <span class='p-key'>TPI Risk:</span>
+            <span class='p-value'>{{tpi.tpi_risk}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_malware}}
+          <div>
+            <span class='p-key'>TPI Malware:</span>
+            <span class='p-value'>{{tpi.malware}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_type}}
+          <div>
+            <span class='p-key'>TPI Type:</span>
+            <span class='p-value'>{{tpi.tpi_type}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_src}}
+          <div>
+            <span class='p-key'>TPI Source:</span>
+            <span class='p-value'>{{tpi.tpi_src}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_src_organization}}
+          <div>
+            <span class='p-key'>TPI Source Org.:</span>
+            <span class='p-value'>{{tpi.tpi_source_organization}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tenantname}}
+          <div>
+            <span class='p-key'>Tenant Name:</span>
+            <span class='p-value'>{{tpi.tenantname}}</span>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
 {{/if}}
 
 {{#if (eq activeTab 'users')}}

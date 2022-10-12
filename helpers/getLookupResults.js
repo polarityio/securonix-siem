@@ -45,15 +45,15 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
       const assets = await getAssets(entityGroups, options, requestWithDefaults, Logger);
       Logger.trace({ assets }, 'assets response');
 
-      const riskHistory = await getRiskHistory(
+      const riskscore = await getRiskHistory(
         entityGroups,
         options,
         requestWithDefaults,
         Logger
       );
-      Logger.trace({ riskHistory }, 'riskHistory response');
+      Logger.trace({ riskscore }, 'riskscore response');
 
-      if (!(violations || users || incidents || tpi || riskHistory || assets))
+      if (!(violations || users || incidents || tpi || riskscore || assets))
         return map(entitiesPartition, (entity) => ({ entity, data: null }));
 
       const responses = {
@@ -81,10 +81,10 @@ const getLookupResults = async (entities, options, requestWithDefaults, Logger) 
           key: 'usersCount',
           maxResultCount: 40
         },
-        riskhistory: {
-          value: riskHistory,
+        riskscore: {
+          value: riskscore,
           direction: 'desc',
-          key: 'riskHistoryCount',
+          key: 'riskscoreCount',
           maxResultCount: 40
         },
         assets: {
