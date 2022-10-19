@@ -8,7 +8,6 @@ const getAssociatedUsers = (violationEvents, Logger) =>
     .thru(groupByMultipleKeys(POSSIBLE_USER_KEYS, Logger))
     .map((userGroup) => {
       const aggregatedUser = _mergeObjects(userGroup);
-
       const flightRiskLevel = _getFlightRiskLevel(userGroup);
 
       return _formatAggregatedUser(aggregatedUser, flightRiskLevel, userGroup);
@@ -64,7 +63,10 @@ const _getFullname = (preferredname, fullname) =>
   !(preferredname || fullname)
     ? 'No Registered Name'
     : preferredname
-    ? preferredname.split(', ').reverse().join(' ')
+    ? preferredname
+        .split(', ')
+        .reverse()
+        .join(' ')
     : fullname;
 
 const _getTimeWithCompany = (hiredate) => {
@@ -78,25 +80,23 @@ const _getTimeWithCompany = (hiredate) => {
   return yearsString + monthsString;
 };
 
-const groupByMultipleKeys =
-  ([key, ...keys], Logger, agg = {}) =>
-  (objs) => {
-    const groupedByThisKey = _.groupBy(objs, key);
-    const updatedAgg = _.reduce(
-      _.omit(groupedByThisKey, undefined),
-      (groupAgg, groupValues, groupKey) => ({
-        ...groupAgg,
-        [groupKey]: groupValues.concat(agg[groupKey] || [])
-      }),
-      agg
-    );
+const groupByMultipleKeys = ([key, ...keys], Logger, agg = {}) => (objs) => {
+  const groupedByThisKey = _.groupBy(objs, key);
+  const updatedAgg = _.reduce(
+    _.omit(groupedByThisKey, undefined),
+    (groupAgg, groupValues, groupKey) => ({
+      ...groupAgg,
+      [groupKey]: groupValues.concat(agg[groupKey] || [])
+    }),
+    agg
+  );
 
-    const objsWithoutKey = groupedByThisKey[undefined] || [];
+  const objsWithoutKey = groupedByThisKey[undefined] || [];
 
-    return objsWithoutKey.length
-      ? groupByMultipleKeys(keys, Logger, updatedAgg)(objsWithoutKey)
-      : updatedAgg;
-  };
+  return objsWithoutKey.length
+    ? groupByMultipleKeys(keys, Logger, updatedAgg)(objsWithoutKey)
+    : updatedAgg;
+};
 
 const getFirstValue = (obj, [key, ...keys]) =>
   obj[key] !== undefined ? obj[key] : keys.length ? getFirstValue(obj, keys) : undefined;

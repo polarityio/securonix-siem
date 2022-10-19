@@ -7,12 +7,16 @@ const {
   POSSIBLE_USER_KEYS
 } = require('../constants');
 
-const getViolations = (associatedUsers, violationEvents, entityGroupType) => {
+const getViolations = (associatedUsers, violationEvents, entityGroupType, Logger) => {
+  Logger.trace({ EVENTS: violationEvents });
   const violationsWithDuplicates = _getViolationsWithDuplicates(
     violationEvents,
     associatedUsers,
-    entityGroupType
+    entityGroupType, 
+    Logger
   );
+
+  Logger.trace({ VIOLATION_DUPES: violationsWithDuplicates });
 
   const violationKeysWithoutTime = VIOLATION_KEYS[entityGroupType].filter(
     (key) => !anyEqual(key, POSSIBLE_TIME_KEYS)
@@ -35,9 +39,16 @@ const getViolations = (associatedUsers, violationEvents, entityGroupType) => {
 const _getViolationsWithDuplicates = (
   violationEvents,
   associatedUsers,
-  entityGroupType
+  entityGroupType,
+  Logger
 ) =>
   violationEvents.map((violation) => {
+    Logger.trace({
+      EVENTS: 12312312312,
+      violationEvents,
+      associatedUsers,
+      entityGroupType
+    });
     const associatedUser = associatedUsers.find((associatedUser) =>
       _.some(
         POSSIBLE_USER_KEYS,

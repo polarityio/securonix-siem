@@ -1,5 +1,7 @@
 const fs = require('fs');
+const { map, get } = require('lodash/fp');
 const request = require('request');
+const { parallelLimit } = require('async');
 
 const config = require('../config/config');
 const getAuthToken = require('./getAuthToken');
@@ -52,12 +54,12 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         const result = await _requestWithDefault(_requestOptions);
 
         checkForStatusError(result, _requestOptions);
+
         postRequestFunctionResults = await postRequestSuccessFunction({
           ...result,
           body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
         });
       } catch (error) {
-        Logger.error(error);
         postRequestFunctionResults = await postRequestFailureFunction(
           error,
           _requestOptions
@@ -76,7 +78,6 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         requestDefaultsWithInterceptors,
         tokenCache
       ).catch((error) => {
-        Logger.error({ error }, 'Unable to retrieve Auth Token');
         throw error;
       });
 
@@ -90,7 +91,6 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         }
       };
     }
-
     return requestOptions;
   };
 
@@ -118,14 +118,26 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     }
   };
 
-  const checkForStatusError = (result, requestOptions) => {
-    const roundedStatus = Math.round(result.statusCode / 100) * 100;
+  const checkForStatusError = ({ statusCode, body }, requestOptions) => {
+    Logger.trace({
+      requestOptions: {
+        ...requestOptions,
+        headers: {
+          ...requestOptions.headers,
+          token: '************'
+        },
+        options: '************'
+      },
+      statusCode,
+      body
+    });
+
+    const roundedStatus = Math.round(statusCode / 100) * 100;
     if (!SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(roundedStatus)) {
       const requestError = Error('Request Error');
-      requestError.status = result.statusCode;
-      requestError.description = result.body;
-      requestError.requestOptions = requestOptions;
-      requestError.requestOptions.headers = '********';
+      requestError.status = statusCode;
+      requestError.description = JSON.stringify(body);
+      requestError.requestOptions = JSON.stringify(requestOptions);
       throw requestError;
     }
   };
@@ -135,7 +147,22 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     (r) => r,
     handleAndReformatErrors
   );
-  return requestDefaultsWithInterceptors;
+
+  const requestsInParallel = async (
+    requestsOptions,
+    responseGetPath = 'body',
+    limit = 10
+  ) => {
+    const unexecutedRequestFunctions = map(
+      (requestOptions) => async () =>
+        get(responseGetPath, await requestDefaultsWithInterceptors(requestOptions)),
+      requestsOptions
+    );
+
+    return await parallelLimit(unexecutedRequestFunctions, limit);
+  };
+
+  return { requestWithDefaults: requestDefaultsWithInterceptors, requestsInParallel };
 };
 
 module.exports = createRequestWithDefaults;
