@@ -52,7 +52,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       let postRequestFunctionResults;
       try {
         const result = await _requestWithDefault(_requestOptions);
-
+        Logger.trace({ RESSSSsSIN: 98888999889, result });
         checkForStatusError(result, _requestOptions);
 
         postRequestFunctionResults = await postRequestSuccessFunction({
@@ -151,7 +151,8 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
   const requestsInParallel = async (
     requestsOptions,
     responseGetPath = 'body',
-    limit = 10
+    limit = 10,
+    Logger
   ) => {
     const unexecutedRequestFunctions = map(
       (requestOptions) => async () =>
@@ -159,6 +160,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       requestsOptions
     );
 
+    Logger.trace({ UNEX: 123123132, unexecutedRequestFunctions });
     return await parallelLimit(unexecutedRequestFunctions, limit);
   };
 

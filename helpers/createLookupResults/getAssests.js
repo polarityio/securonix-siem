@@ -1,21 +1,33 @@
-const { get } = require('lodash/fp');
-const buildViolationQueryParams = require('../buildViolationQueryParams');
+const { map } = require('lodash/fp');
+const { QUERY_KEYS } = require('../constants');
 
-const getAssets = async (entityGroups, options, requestWithDefaults, Logger) => {
+const getAssets = async (entity, options, requestsInParallel, Logger) => {
   try {
-    const response = await requestWithDefaults({
-      uri: `${options.url}/Snypr/ws/spotter/index/search`,
-      headers: {
-        username: options.username,
-        password: options.password,
-        baseUrl: options.url
-      },
-      qs: buildViolationQueryParams(entityGroups, 'asset', Logger),
-      json: true
-    });
-    Logger.trace({ response }, 'Get Assets response');
+    const { asset } = QUERY_KEYS;
+    const userKeys = asset[entity.transformedEntityType];
 
-    return get('body.events', response);
+    const requestOptions = map(
+      (queryKey) => ({
+        uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=asset AND ${queryKey}=${entity.value}`,
+        headers: {
+          username: options.username,
+          password: options.password,
+          baseUrl: options.url
+        },
+        json: true
+      }),
+      userKeys
+    );
+
+    const assetResponse = await requestsInParallel(
+      requestOptions,
+      'body.events',
+      10,
+      Logger
+    );
+
+    Logger.trace({ assetResponse }, 'Asset Results');
+    return assetResponse.flat(); //would like to return this without calling flat().
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

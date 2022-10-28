@@ -34,8 +34,8 @@ const doLookup = async (entities, options, cb) => {
 
   try {
     lookupResults = await Promise.all(
-      map(async (entity) => {
-        entity.transformedEntityType = transformType(entity);
+      map(async (searchedEntity) => {
+        const entity = { ...searchedEntity, transformedEntityType: transformType(searchedEntity) };
         const lookupResults = await getLookupResults(
           entity,
           options,
@@ -45,8 +45,6 @@ const doLookup = async (entities, options, cb) => {
         return lookupResults;
       }, entities)
     );
-    // do entity transformation at top, add property to single entity
-
     Logger.trace({ lookupResults });
     return cb(null, lookupResults);
   } catch (error) {

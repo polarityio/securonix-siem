@@ -1,138 +1,6 @@
-// const _ = require('lodash');
-// const {
-//   flow,
-//   keys,
-//   some,
-//   size,
-//   get,
-//   reduce,
-//   orderBy,
-//   slice,
-//   capitalize,
-//   filter,
-//   toLower,
-//   getOr,
-//   includes,
-//   map
-// } = require('lodash/fp');
-
-// const getAssociatedUsers = require('./getAssociatedUsers');
-// const getViolations = require('./getViolations');
-// const { getObjectsContainingString } = require('../dataTransformations');
-
-// const { QUERY_KEYS } = require('../constants');
-
-// const createLookupResults = async (options, queryResults, Logger) =>
-//   _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
-//     groupEntities.map(
-//       _aggregateAndProcessResponses(options, queryResults, entityGroupType, Logger)
-//     )
-//   );
-
-// const _aggregateAndProcessResponses = (
-//   options,
-//   queryResults,
-//   entityGroupType,
-//   Logger
-// ) => (entity) => {
-//   const queryResultsForThisEntity = getQueryResultsForThisEntity(
-//     queryResults,
-//     entity,
-//     entityGroupType,
-//     Logger
-//   );
-
-//   const associatedUsers = getAssociatedUsers(queryResultsForThisEntity.violation, Logger);
-
-//   const violations = getViolations(
-//     associatedUsers,
-//     queryResultsForThisEntity.violation,
-//     entityGroupType
-//   );
-
-//   const queryResultsAreFound = some(size, queryResultsForThisEntity);
-
-//   return {
-//     entity,
-//     data: queryResultsAreFound
-//       ? {
-//           summary: createSummaryTags(queryResultsForThisEntity, associatedUsers),
-//           details: {
-//             ...queryResultsForThisEntity,
-//             violations,
-//             associatedUsers
-//           }
-//         }
-//       : null
-//   };
-// };
-
-// const getQueryResultsForThisEntity = (queryResults, entity, entityType, Logger) =>
-//   flow(
-//     keys,
-//     reduce((agg, queryResponseKey) => {
-//       const queryResultsForThisKey = get(queryResponseKey, queryResults);
-//       const allAssociatedQueryResults = getObjectsContainingString(
-//         entity.value,
-//         get('value', queryResultsForThisKey),
-//         Logger
-//       );
-
-//       const queryResultForThisEntity = filterQueryResultByQueryKey(
-//         allAssociatedQueryResults,
-//         entity,
-//         entityType,
-//         queryResponseKey,
-//         Logger
-//       );
-
-//       const sortedQueryResultsForThisEntity = sortQueryResults(
-//         queryResults,
-//         queryResultForThisEntity,
-//         queryResponseKey,
-//         Logger
-//       );
-
-//       return {
-//         ...agg,
-//         [queryResponseKey]: sortedQueryResultsForThisEntity,
-//         [`${queryResponseKey}MaxResultCount`]: getOr(
-//           0,
-//           [queryResponseKey, 'maxResultCount'],
-//           queryResults
-//         )
-//       };
-//     }, {})
-//   )(queryResults);
-
-// const filterQueryResultByQueryKey = (
-//   allAssociatedQueryResults,
-//   entity,
-//   entityType,
-//   queryResponseKey,
-//   Logger
-// ) =>
-//   filter((associatedQueryResult) => {
-//     const queryKeysForThisEntityType = get([queryResponseKey, entityType], QUERY_KEYS);
-
-//     const entityValueIsAssociatedWithKey = some(
-//       (queryKey) =>
-//         flow(
-//           getOr('', queryKey),
-//           toLower,
-//           includes(flow(get('value'), toLower)(entity))
-//         )(associatedQueryResult),
-//       queryKeysForThisEntityType
-//     );
-
-//     return entityValueIsAssociatedWithKey;
-//   }, allAssociatedQueryResults);
-
-// module.exports = createLookupResults;
-
 const _ = require('lodash');
+const { flow, size, get } = require('lodash/fp');
 
-const getViolationsForThisEntity = require('./getViolationsForThisEntity');
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
 
@@ -145,6 +13,8 @@ const createLookupResults = async (
   foundIncidents,
   Logger
 ) => {
+  const { users, tpi, riskscore, assets } = responses;
+
   const violations = await processesViolationResponse(
     options,
     responses,
@@ -153,10 +23,12 @@ const createLookupResults = async (
     Logger
   );
 
-  Logger.trace({ RESPONSE: 777777777777, violations });
-
   const apiData = {
-    ...violations
+    ...violations,
+    users: users.value,
+    tpi: tpi.value,
+    riskscore: riskscore.value,
+    asset: assets.value
   };
 
   return polarityResponse(entity, apiData, Logger);
@@ -169,8 +41,7 @@ const processesViolationResponse = async (
   foundIncidents,
   Logger
 ) => {
-  const associatedUsers = getAssociatedUsers(responses.violation.value, Logger); // need to take the nested array
-
+  const associatedUsers = getAssociatedUsers(responses.violation.value, Logger);
   const violations = getViolations(
     associatedUsers,
     responses.violation.value,
@@ -207,13 +78,11 @@ const processesViolationResponse = async (
 };
 
 const polarityResponse = (entity, apiData, Logger) => {
-  // need to write conditions
-  Logger.trace({ VIOLATIONS: apiData });
-  return apiData.violations
+  return apiData.violations || apiData.users || apiData.tpi
     ? {
         entity,
         data: {
-          summary: [],
+          summary: createSummaryTags(apiData, Logger),
           details: apiData
         }
       }
@@ -225,19 +94,35 @@ const emptyResponse = (entity) => ({
   data: null
 });
 
-// const createSummaryTags = (queryResultsForThisEntity, associatedUsers) => {
-//   const countSummarytags = flow(
-//     keys,
-//     filter((key) => size(queryResultsForThisEntity[key])),
-//     map((key) => `${capitalize(key)}: ${size(queryResultsForThisEntity[key])}`)
-//   )(queryResultsForThisEntity);
+const createSummaryTags = (apiData, Logger) => {
+  let tags = [];
 
-//   const associatedUsersTag = size(associatedUsers)
-//     ? `Associated Users: ${size(associatedUsers)}`
-//     : [];
+  const getPathSize = (path) => flow(get(path), size)(apiData);
 
-//   return [].concat(countSummarytags).concat(associatedUsersTag);
-// };
+  const userSize = getPathSize('users');
+  if (userSize) tags.push(`User Size: ${userSize}`);
+
+  const violationSize = getPathSize('violations');
+  if (violationSize) tags.push(`Violations: ${violationSize}`);
+
+  const associatedUsers = getPathSize('associatedUsers');
+  if (associatedUsers) tags.push(`Associated Users: ${associatedUsers}`);
+
+  const incidents = getPathSize('incidents');
+  if (incidents) tags.push(`Incidents: ${incidents}`);
+
+  const tpi = getPathSize('tpi');
+  if (tpi) tags.push(`TPI: ${tpi}`);
+
+  const riskscore = getPathSize('riskscore');
+  if (riskscore) tags.push(`Risk Score: ${riskscore}`);
+
+  const asset = getPathSize('asset');
+  if (asset) tags.push(`Asset: ${asset}`);
+
+  Logger.trace({ tags }, 'List of tags');
+  return tags;
+};
 
 // const sortQueryResults = (
 //   queryResults,

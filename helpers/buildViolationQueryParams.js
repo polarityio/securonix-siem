@@ -4,9 +4,6 @@ const { QUERY_KEYS } = require('./constants');
 const { flow, join, map, flatten, get, compact } = require('lodash/fp');
 const mapObj = require('lodash/fp/map').convert({ cap: false });
 
-// 1. are we getting duplicates, for simple entity lookup - single lookup. test - do we need duplicate logic?
-// 2.
-
 // const buildViolationQueryParams = (entityGroups, index, Logger) => {
 //   const query = _buildSecuronixQuery(entityGroups, index, Logger);
 //   Logger.trace({ QUERY: query, entityGroups });

@@ -1,15 +1,11 @@
-const { parallelLimit } = require('async');
 const m = require('moment');
-const { get, map } = require('lodash/fp');
-const getQueryStringsForThisEntity = require('./buildViolationQueryParams');
+const { map } = require('lodash/fp');
 const { QUERY_KEYS } = require('./constants');
 
-// returns an array of event objects
 const getViolationResponse = async (entity, options, requestsInParallel, Logger) => {
   try {
     const { violation } = QUERY_KEYS;
-    const type = await transformType(entity);
-    const ViolationKeys = violation[type];
+    const ViolationKeys = violation[entity.transformedEntityType];
 
     const violationRequestsOptions = map(
       (queryKey) => ({
@@ -27,7 +23,9 @@ const getViolationResponse = async (entity, options, requestsInParallel, Logger)
 
     const violationResults = await requestsInParallel(
       violationRequestsOptions,
-      'body.events'
+      'body.events',
+      10,
+      Logger
     );
 
     Logger.trace({ violationResults }, 'Violation Results');
@@ -35,12 +33,6 @@ const getViolationResponse = async (entity, options, requestsInParallel, Logger)
   } catch (err) {
     throw err;
   }
-};
-
-const transformType = async (entity) => {
-  if (entity.isIP) return 'ip';
-  if (entity.isDomain) return 'domain';
-  if (entity.isEmail) return 'email';
 };
 
 const _getTimeframeParams = (monthsBack, dateTo) => ({
