@@ -1,5 +1,5 @@
 const m = require('moment');
-const { getOr, flow, concat, uniqBy } = require('lodash/fp');
+const { getOr, flow, concat, uniqBy, get } = require('lodash/fp');
 
 const NodeCache = require('node-cache');
 const { INCIDENT_PAGE_SIZE } = require('../constants');
@@ -8,7 +8,7 @@ const incidentCache = new NodeCache({
   stdTTL: 60 * 60
 });
 
-const getAllIncidents = async (options, requestWithDefaults, Logger) => {
+const getAllIncidents = async (options, requestsInParallel, Logger) => {
   const allIncidents = incidentCache.get('allIncidents');
   if (allIncidents) return allIncidents;
 
@@ -26,16 +26,14 @@ const getAllIncidents = async (options, requestWithDefaults, Logger) => {
     'opened',
     lookBackTime,
     options,
-    requestWithDefaults,
-    Logger
+    requestsInParallel
   );
 
   const closedIncidents = await getAllIncidentsOfRangeType(
     'closed',
     lookBackTime,
     options,
-    requestWithDefaults,
-    Logger
+    requestsInParallel
   );
 
   const foundIncidents = flow(
@@ -52,16 +50,37 @@ const getAllIncidentsOfRangeType = async (
   rangeType,
   from,
   options,
-  requestWithDefaults,
-  Logger,
+  requestsInParallel,
   allTotalIncidents,
   offset = 0,
   aggIncidents = []
 ) => {
+  // const incidentData = (
+  //   await requestsInParallel({
+  //     uri: `${options.url}/Snypr/ws/incident/get`,
+  //     headers: {
+  //       username: options.username,
+  //       password: options.password,
+  //       baseUrl: options.url
+  //     },
+  //     qs: {
+  //       type: 'list',
+  //       rangeType,
+  //       from,
+  //       to: m.utc().valueOf(),
+  //       max: INCIDENT_PAGE_SIZE,
+  //       ...(offset && { offset })
+  //     },
+  //     json: true
+  //   })
+  // ).body.result.data;
+
+  // const { totalIncidents, incidentItems } = incidentData;
+
   const { totalIncidents, incidentItems } = getOr(
     { totalIncidents: 0, incidentItems: [] },
     'body.result.data',
-    await requestWithDefaults({
+    await requestsInParallel({
       uri: `${options.url}/Snypr/ws/incident/get`,
       headers: {
         username: options.username,
@@ -75,9 +94,8 @@ const getAllIncidentsOfRangeType = async (
         to: m.utc().valueOf(),
         max: INCIDENT_PAGE_SIZE,
         ...(offset && { offset })
-      },
-      json: true
-    }).then(_checkForInternalSecuronixError(Logger))
+      }
+    })
   );
   const allIncidentItems = aggIncidents.concat(incidentItems);
 
@@ -87,8 +105,7 @@ const getAllIncidentsOfRangeType = async (
       rangeType,
       from,
       options,
-      requestWithDefaults,
-      Logger,
+      requestsInParallel,
       allTotalIncidents,
       offset + INCIDENT_PAGE_SIZE,
       allIncidentItems
@@ -96,22 +113,6 @@ const getAllIncidentsOfRangeType = async (
   }
 
   return allIncidentItems;
-};
-
-const _checkForInternalSecuronixError = (Logger) => (response) => {
-  const {
-    body: { error, errorMessage }
-  } = response;
-
-  Logger.trace({ error, errorMessage, response }, 'Get Incidents Request');
-
-  if (error || errorMessage) {
-    const internalSecuronixError = Error('Internal Securonix Query Error');
-    internalSecuronixError.status = 'internalSecuronixError';
-    internalSecuronixError.description = errorMessage || error;
-    throw internalSecuronixError;
-  }
-  return response;
 };
 
 module.exports = getAllIncidents;

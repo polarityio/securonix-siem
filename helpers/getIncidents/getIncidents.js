@@ -1,14 +1,17 @@
 const getAllIncidents = require('./getAllIncidents');
 const getIncidentsForEachEntity = require('./getIncidentsForEachEntity');
 
-const getIncidents = async (entitiesPartition, options, requestWithDefaults, Logger) => {
-  const allIncidents = await getAllIncidents(options, requestWithDefaults, Logger);
+const getIncidents = async (singleEntity, options, requestsInParallel, Logger) => {
+  Logger.trace({ HERE: 4444444 });
 
+  const allIncidents = await getAllIncidents(options, requestsInParallel, Logger);
+  Logger.trace({ HERE: 22222222 });
   const incidentsWithEachEntity = getIncidentsForEachEntity(
-    entitiesPartition,
+    singleEntity,
     allIncidents,
     Logger
   );
+  Logger.trace({ HERE: 3333333 });
 
   return incidentsWithEachEntity;
 };

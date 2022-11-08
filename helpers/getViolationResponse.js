@@ -2,20 +2,27 @@ const m = require('moment');
 const { map } = require('lodash/fp');
 const { QUERY_KEYS } = require('./constants');
 
+// lodash/fp - flatten
+
 const getViolationResponse = async (entity, options, requestsInParallel, Logger) => {
   try {
+    Logger.trace({ DATA: 123123123123 });
     const { violation } = QUERY_KEYS;
     const ViolationKeys = violation[entity.transformedEntityType];
+    Logger.trace({ DATA: 222222 });
 
     const violationRequestsOptions = map(
       (queryKey) => ({
-        uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=violation AND ${queryKey}=${entity.value}`,
+        uri: `${options.url}/Snypr/ws/spotter/index/search`,
         headers: {
           username: options.username,
           password: options.password,
           baseUrl: options.url
         },
-        qs: _getTimeframeParams(options.monthsBack),
+        qs: {
+          ..._getTimeframeParams(options.monthsBack),
+          query: `index=violation AND ${queryKey}=${entity.value}`
+        },
         json: true
       }),
       ViolationKeys

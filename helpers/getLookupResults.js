@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const { map } = require('lodash');
 
 const createLookupResults = require('./createLookupResults/index');
 const getViolationResponse = require('./getViolationResponse');
@@ -11,10 +10,10 @@ const getAssets = require('./createLookupResults/getAssests');
 
 const getLookupResults = async (entity, options, requestFunctions, Logger) => {
   const incidents = options.searchIncidents
-    ? await getIncidents(entitiesPartition, options, requestFunctions, Logger)
+    ? await getIncidents(entity, options, requestFunctions.requestsInParallel, Logger)
     : {};
   Logger.trace({ incidents }, 'incidents response');
-
+  // const incidents = [];
   const violations = await getViolationResponse(
     entity,
     options,
@@ -49,9 +48,6 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     Logger
   );
   Logger.trace({ riskscore }, 'riskscore response');
-
-  if (!(violations || users || incidents || tpi || riskscore || assets))
-    return map(entitiesPartition, (entity) => ({ entity, data: null }));
 
   const responses = {
     violation: {

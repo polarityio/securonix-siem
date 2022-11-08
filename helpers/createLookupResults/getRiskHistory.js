@@ -34,10 +34,4 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
   }
 };
 
-const transformType = async (entity) => {
-  if (entity.isIP) return 'ip';
-  if (entity.isDomain) return 'domain';
-  if (entity.isEmail) return 'email';
-};
-
 module.exports = getRiskHistory;
