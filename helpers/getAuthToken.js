@@ -7,10 +7,8 @@ const getAuthToken = async (
   Logger
 ) => {
   const authCacheKey = `${username}${password}`;
-
   const cachedToken = tokenCache.get(authCacheKey);
-  Logger.trace({ username, password, baseUrl, cachedToken });
-  Logger.trace({ CACHED_TOKEN: cachedToken });
+
   if (cachedToken) return cachedToken;
 
   const { body: newToken } = await requestWithDefaults({
@@ -25,7 +23,6 @@ const getAuthToken = async (
 
   if (newToken) tokenCache.set(authCacheKey, newToken);
 
-  Logger.trace({ TOKEN: newToken });
   return newToken;
 };
 

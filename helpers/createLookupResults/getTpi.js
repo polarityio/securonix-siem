@@ -1,4 +1,4 @@
-const { map } = require('lodash/fp');
+const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
 const getTpi = async (entity, options, requestsInParallel, Logger) => {
@@ -8,11 +8,14 @@ const getTpi = async (entity, options, requestsInParallel, Logger) => {
 
     const requestOptions = map(
       (queryKey) => ({
-        uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=tpi AND ${queryKey}=${entity.value}`,
+        uri: `${options.url}/Snypr/ws/spotter/index/search`,
         headers: {
           username: options.username,
           password: options.password,
           baseUrl: options.url
+        },
+        qs: {
+          query: `index=tpi AND ${queryKey}=${entity.value}`
         },
         json: true
       }),
@@ -27,7 +30,7 @@ const getTpi = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ tpiResponse }, 'User By Emails Results');
-    return tpiResponse.flat();
+    return flatten(tpiResponse);
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

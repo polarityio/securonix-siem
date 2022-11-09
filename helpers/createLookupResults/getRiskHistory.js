@@ -1,4 +1,4 @@
-const { map } = require('lodash/fp');
+const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
 const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
@@ -8,12 +8,13 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
 
     const requestOptions = map(
       (queryKey) => ({
-        uri: `${options.url}/Snypr/ws/spotter/index/search?query=index=riskscore AND ${queryKey}=${entity.value}`,
+        uri: `${options.url}/Snypr/ws/spotter/index/search`,
         headers: {
           username: options.username,
           password: options.password,
           baseUrl: options.url
         },
+        qs: { query: `index=violation AND ${queryKey}=${entity.value}` },
         json: true
       }),
       userKeys
@@ -27,7 +28,7 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ riskscoreResponse }, 'Riskscore Results');
-    return riskscoreResponse.flat(); //would like to return this without calling flat().
+    return flatten(riskscoreResponse);
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

@@ -1,4 +1,4 @@
-const { map } = require('lodash/fp');
+const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
 const parseErrorToReadableJSON = (error) =>
@@ -11,11 +11,14 @@ const getUsersByEmail = async (entity, options, requestsInParallel, Logger) => {
 
     const requestOptions = map(
       (queryKey) => ({
-        uri: `${options.url}/Snypr/w/spotter/index/search?query=index=users AND ${queryKey}=${entity.value}`,
+        uri: `${options.url}/Snypr/ws/spotter/index/search`,
         headers: {
           username: options.username,
           password: options.password,
           baseUrl: options.url
+        },
+        qs: {
+          query: `index=users AND ${queryKey}=${entity.value}`
         },
         json: true
       }),
@@ -30,7 +33,7 @@ const getUsersByEmail = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ userByEmailResults }, 'User By Emails Results');
-    return userByEmailResults.flat(); //would like to return this without calling flat().
+    return flatten(userByEmailResults);
   } catch (error) {
     const err = parseErrorToReadableJSON(error);
     Logger.error({ ERR: err });

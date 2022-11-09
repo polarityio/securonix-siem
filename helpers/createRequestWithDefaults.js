@@ -7,6 +7,7 @@ const request = require('postman-request');
 const getAuthToken = require('./getAuthToken');
 
 const SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES = [200];
+const { MAX_AUTH_RETRIES } = require('./constants');
 
 const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
 const parseErrorToReadableJSON = (error) =>
@@ -45,7 +46,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       });
 
     return async ({ json: bodyWillBeJSON, ...requestOptions }) => {
-      const preRequestFunctionResults = await preRequestFunction(requestOptions);
+      const preRequestFunctionResults = await preRequestFunction(requestOptions); // calls handleAUth and returns token;
 
       const _requestOptions = {
         ...requestOptions,

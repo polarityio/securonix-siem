@@ -4,7 +4,7 @@ polarity.export = PolarityComponent.extend({
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
   watchListHasBeenCalled: false,
-  tabNames: ['violations', 'associatedUsers', 'incidents', 'users', 'riskscore', 'tpi'],
+  tabNames: ['violation', 'associatedUsers', 'incidents', 'users', 'riskscore', 'tpi'],
   watchLists: null,
   activeTab: '',
   expandableTitleStates: {
@@ -23,7 +23,6 @@ polarity.export = PolarityComponent.extend({
   },
   actions: {
     changeTab: function (tabName) {
-      console.log(this.details);
       this.set('activeTab', tabName);
     },
     toggleExpandableTitle: function (index, type) {

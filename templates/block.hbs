@@ -162,14 +162,14 @@
   </div>
 {{/if}}
 
-{{#if (eq activeTab 'violations')}}
+{{#if (eq activeTab 'violation')}}
   <div class='view-in-ts'>
     <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
       Securonix
       {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
   </div>
   <div class='mb-1'>
-    {{#each details.violations as |violation index|}}
+    {{#each details.violation as |violation index|}}
       {{#if (gt index 0)}}
         <hr />
       {{/if}}

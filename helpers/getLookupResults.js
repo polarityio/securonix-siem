@@ -9,11 +9,11 @@ const getRiskHistory = require('./createLookupResults/getRiskHistory');
 const getAssets = require('./createLookupResults/getAssests');
 
 const getLookupResults = async (entity, options, requestFunctions, Logger) => {
-  const incidents = options.searchIncidents
-    ? await getIncidents(entity, options, requestFunctions.requestsInParallel, Logger)
-    : {};
-  Logger.trace({ incidents }, 'incidents response');
-  // const incidents = [];
+  // const incidents = options.searchIncidents
+  //   ? await getIncidents(entity, options, requestFunctions.requestsInParallel, Logger)
+  //   : {};
+  // Logger.trace({ incidents }, 'incidents response');
+
   const violations = await getViolationResponse(
     entity,
     options,
@@ -82,13 +82,7 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     }
   };
 
-  const lookupResults = await createLookupResults(
-    options,
-    responses,
-    entity,
-    incidents,
-    Logger
-  );
+  const lookupResults = await createLookupResults(responses, entity, incidents, Logger);
 
   return lookupResults;
 };

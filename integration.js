@@ -12,6 +12,11 @@ const { getLookupResults } = require('./helpers/getLookupResults');
 let Logger;
 let requestFunctions;
 
+// fix incidents
+// fix how conditionals for what data the response will contain.*
+// error handling
+// confirm there are no race conditions.
+
 const tokenCache = new NodeCache({
   stdTTL: TIME_FOR_TOKEN_DAYS * 24 * 60 * 60 - 8000, //Token lasts Token length days
   checkperiod: 24 * 60 * 60 //Check if Expired once a day
@@ -35,13 +40,19 @@ const doLookup = async (entities, options, cb) => {
   try {
     lookupResults = await Promise.all(
       map(async (searchedEntity) => {
-        const entity = { ...searchedEntity, transformedEntityType: transformType(searchedEntity) };
+
+        const entity = {
+          ...searchedEntity,
+          transformedEntityType: transformType(searchedEntity)
+        };
+
         const lookupResults = await getLookupResults(
           entity,
           options,
           requestFunctions,
           Logger
         );
+
         return lookupResults;
       }, entities)
     );
