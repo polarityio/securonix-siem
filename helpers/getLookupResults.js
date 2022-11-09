@@ -13,7 +13,7 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
   //   ? await getIncidents(entity, options, requestFunctions.requestsInParallel, Logger)
   //   : {};
   // Logger.trace({ incidents }, 'incidents response');
-
+  const incidents = [];
   const violations = await getViolationResponse(
     entity,
     options,

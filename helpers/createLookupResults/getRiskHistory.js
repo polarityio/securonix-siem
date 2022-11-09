@@ -1,4 +1,4 @@
-const { map, flatten } = require('lodash/fp');
+const { map } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
 const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
@@ -14,7 +14,7 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
           password: options.password,
           baseUrl: options.url
         },
-        qs: { query: `index=violation AND ${queryKey}=${entity.value}` },
+        qs: { query: `index=riskscore AND ${queryKey}=${entity.value}` },
         json: true
       }),
       userKeys
@@ -28,7 +28,7 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ riskscoreResponse }, 'Riskscore Results');
-    return flatten(riskscoreResponse);
+    return riskscoreResponse.flat(); //would like to return this without calling flat().
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

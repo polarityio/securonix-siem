@@ -18,7 +18,7 @@ const processResponses = (responseKey, responseValue) => {
 };
 
 const getLookupResults = async (responses, entity, foundIncidents, Logger) => {
-  let responses;
+  let processedResponses;
 
   const processedViolationResponse = await processesViolationResponse(
     responses,
@@ -29,11 +29,11 @@ const getLookupResults = async (responses, entity, foundIncidents, Logger) => {
 
   for (let [queryKey, response] of Object.entries(responses)) {
     if (get('length', response.value)) {
-      responses = processResponses(queryKey, response.value, Logger);
+      processedResponses = processResponses(queryKey, response.value, Logger);
     }
   }
 
-  return (results = { ...responses, ...processedViolationResponse });
+  return (results = { ...processedResponses, ...processedViolationResponse });
 };
 
 const processesViolationResponse = async (responses, entity, foundIncidents, Logger) => {
