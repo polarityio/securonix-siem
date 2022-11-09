@@ -14,7 +14,6 @@ const getAuthToken = async (
   const { body: newToken } = await requestWithDefaults({
     uri: `${baseUrl}/Snypr/ws/token/generate`,
     headers: {
-      'Content-Type': 'application/json',
       username,
       password,
       validity: TIME_FOR_TOKEN_DAYS
