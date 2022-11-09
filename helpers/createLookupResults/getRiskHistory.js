@@ -28,7 +28,7 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ riskscoreResponse }, 'Riskscore Results');
-    return riskscoreResponse.flat(); //would like to return this without calling flat().
+    return riskscoreResponse.flat();
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

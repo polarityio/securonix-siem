@@ -6,15 +6,7 @@ const getViolations = require('./getViolations');
 
 const createLookupResults = async (responses, entity, foundIncidents, Logger) => {
   const lookupResults = await getLookupResults(responses, entity, foundIncidents, Logger);
-
   return polarityResponse(entity, lookupResults, Logger);
-};
-
-const processResponses = (responseKey, responseValue) => {
-  const { direction, key } = getOr({}, responseKey, responseValue);
-  const sortedQueryResults = orderBy(key, direction, responseValue);
-
-  return { [responseKey]: sortedQueryResults };
 };
 
 const getLookupResults = async (responses, entity, foundIncidents, Logger) => {
@@ -27,6 +19,7 @@ const getLookupResults = async (responses, entity, foundIncidents, Logger) => {
     Logger
   );
 
+  // sorts responses and returns the results associated with the query type in an object.
   for (let [queryKey, response] of Object.entries(responses)) {
     if (get('length', response.value)) {
       processedResponses = processResponses(queryKey, response.value, Logger);
@@ -34,6 +27,13 @@ const getLookupResults = async (responses, entity, foundIncidents, Logger) => {
   }
 
   return (results = { ...processedResponses, ...processedViolationResponse });
+};
+
+const processResponses = (responseKey, responseValue) => {
+  const { direction, key } = getOr({}, responseKey, responseValue);
+  const sortedQueryResults = orderBy(key, direction, responseValue);
+
+  return { [responseKey]: sortedQueryResults };
 };
 
 const processesViolationResponse = async (responses, entity, foundIncidents, Logger) => {
@@ -47,7 +47,6 @@ const processesViolationResponse = async (responses, entity, foundIncidents, Log
   );
 
   const incidents = foundIncidents[entity.value];
-  Logger.trace({ INCIDENTS: 123123132, incidents });
 
   // conditionally adding properties to violation response, property wont be added if there is no data.
   return {
@@ -62,7 +61,7 @@ const processesViolationResponse = async (responses, entity, foundIncidents, Log
 };
 
 const polarityResponse = (entity, details, Logger) => {
-  return Object.keys(details).length
+  return get('length', Object.keys(details))
     ? {
         entity,
         data: {
