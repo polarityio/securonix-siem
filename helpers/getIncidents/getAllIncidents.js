@@ -1,5 +1,5 @@
 const m = require('moment');
-const { getOr, flow, concat, uniqBy, get } = require('lodash/fp');
+const { flow, concat, uniqBy } = require('lodash/fp');
 
 const NodeCache = require('node-cache');
 const { INCIDENT_PAGE_SIZE } = require('../constants');
@@ -26,14 +26,16 @@ const getAllIncidents = async (options, requestsInParallel, Logger) => {
     'opened',
     lookBackTime,
     options,
-    requestsInParallel
+    requestsInParallel,
+    Logger
   );
 
   const closedIncidents = await getAllIncidentsOfRangeType(
     'closed',
     lookBackTime,
     options,
-    requestsInParallel
+    requestsInParallel,
+    Logger
   );
 
   const foundIncidents = flow(
@@ -51,52 +53,39 @@ const getAllIncidentsOfRangeType = async (
   from,
   options,
   requestsInParallel,
-  allTotalIncidents,
-  offset = 0,
-  aggIncidents = []
+  Logger
 ) => {
-  // const incidentData = (
-  //   await requestsInParallel({
-  //     uri: `${options.url}/Snypr/ws/incident/get`,
-  //     headers: {
-  //       username: options.username,
-  //       password: options.password,
-  //       baseUrl: options.url
-  //     },
-  //     qs: {
-  //       type: 'list',
-  //       rangeType,
-  //       from,
-  //       to: m.utc().valueOf(),
-  //       max: INCIDENT_PAGE_SIZE,
-  //       ...(offset && { offset })
-  //     },
-  //     json: true
-  //   })
-  // ).body.result.data;
+  let offset = 0;
+  let aggIncidents = [];
+  let allTotalIncidents;
 
-  // const { totalIncidents, incidentItems } = incidentData;
+  const incidentRequestOptions = {
+    uri: `${options.url}/Snypr/ws/incident/get`,
+    headers: {
+      username: options.username,
+      password: options.password,
+      baseUrl: options.url
+    },
+    qs: {
+      type: 'list',
+      rangeType,
+      from,
+      to: m.utc().valueOf(),
+      max: INCIDENT_PAGE_SIZE,
+      ...(offset && { offset })
+    },
+    json: true
+  };
 
-  const { totalIncidents, incidentItems } = getOr(
-    { totalIncidents: 0, incidentItems: [] },
-    'body.result.data',
-    await requestsInParallel({
-      uri: `${options.url}/Snypr/ws/incident/get`,
-      headers: {
-        username: options.username,
-        password: options.password,
-        baseUrl: options.url
-      },
-      qs: {
-        type: 'list',
-        rangeType,
-        from,
-        to: m.utc().valueOf(),
-        max: INCIDENT_PAGE_SIZE,
-        ...(offset && { offset })
-      }
-    })
+  const incidentData = await requestsInParallel(
+    [incidentRequestOptions],
+    'body.events',
+    10,
+    Logger
   );
+
+  const { totalIncidents, incidentItems } = incidentData;
+
   const allIncidentItems = aggIncidents.concat(incidentItems);
 
   allTotalIncidents = allTotalIncidents || totalIncidents;

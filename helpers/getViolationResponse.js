@@ -2,8 +2,6 @@ const m = require('moment');
 const { map } = require('lodash/fp');
 const { QUERY_KEYS } = require('./constants');
 
-// lodash/fp - flatten
-
 const getViolationResponse = async (entity, options, requestsInParallel, Logger) => {
   try {
     const { violation } = QUERY_KEYS;

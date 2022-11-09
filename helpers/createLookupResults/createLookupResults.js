@@ -46,20 +46,16 @@ const processesViolationResponse = async (responses, entity, foundIncidents, Log
     Logger
   );
 
-  const violationsCount = violations.reduce(
-    (agg, violation) => agg + violation.violationCount,
-    0
-  );
   const incidents = foundIncidents[entity.value];
+  Logger.trace({ INCIDENTS: 123123132, incidents });
 
   // conditionally adding properties to violation response, property wont be added if there is no data.
   return {
-    ...(associatedUsers.length && { associatedUsers: associatedUsers }),
-    ...(violations.length && {
+    ...(get('length', associatedUsers) && { associatedUsers: associatedUsers }),
+    ...(get('length', violations) && {
       violation: violations
     }),
-    ...(violationsCount && { violationsCount: violationsCount }),
-    ...(incidents && {
+    ...(get('length', incidents) && {
       incidents: incidents
     })
   };

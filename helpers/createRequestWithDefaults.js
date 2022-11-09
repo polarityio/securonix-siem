@@ -1,5 +1,4 @@
 const fs = require('fs');
-const util = require('util');
 const { map, get, identity } = require('lodash/fp');
 const { parallelLimit } = require('async');
 const request = require('postman-request');
@@ -107,7 +106,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
   const handleAuth = async (requestOptions) => {
     const isAuthRequest = get('headers.validity', requestOptions);
     const requestWithDefaults = requestWithDefaultsBuilder();
-
+    
     if (!isAuthRequest) {
       const token = await getAuthToken(
         get('headers', requestOptions),
@@ -115,7 +114,6 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         tokenCache,
         Logger
       ).catch((error) => {
-        Logger.trace({ AUTH_ERR: error });
         throw error;
       });
 
@@ -175,7 +173,6 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         requestsOptions
       );
 
-      Logger.trace({ parallelRequestFuncs: util.inspect(unexecutedRequestFunctions) });
       return parallelLimit(unexecutedRequestFunctions, limit);
     } catch (error) {
       const err = parseErrorToReadableJSON(error);
