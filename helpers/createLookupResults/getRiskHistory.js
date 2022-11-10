@@ -1,4 +1,4 @@
-const { map } = require('lodash/fp');
+const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
 const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
@@ -28,7 +28,7 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ riskscoreResponse }, 'Riskscore Results');
-    return riskscoreResponse.flat();
+    return flatten(riskscoreResponse);
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

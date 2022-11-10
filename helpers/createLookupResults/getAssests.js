@@ -1,4 +1,4 @@
-const { map } = require('lodash/fp');
+const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
 const getAssets = async (entity, options, requestsInParallel, Logger) => {
@@ -27,7 +27,7 @@ const getAssets = async (entity, options, requestsInParallel, Logger) => {
     );
 
     Logger.trace({ assetResponse }, 'Asset Results');
-    return assetResponse.flat(); //would like to return this without calling flat().
+    return flatten(assetResponse);
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;

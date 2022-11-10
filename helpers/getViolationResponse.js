@@ -1,5 +1,5 @@
 const m = require('moment');
-const { map } = require('lodash/fp');
+const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('./constants');
 
 const getViolationResponse = async (entity, options, requestsInParallel, Logger) => {
@@ -32,7 +32,7 @@ const getViolationResponse = async (entity, options, requestsInParallel, Logger)
     );
 
     Logger.trace({ violationResults }, 'Violation Results');
-    return violationResults.flat(); //would like to return this without calling flat().
+    return flatten(violationResults);
   } catch (err) {
     throw err;
   }
