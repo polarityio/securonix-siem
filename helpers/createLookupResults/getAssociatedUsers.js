@@ -1,4 +1,6 @@
 const _ = require('lodash');
+const { get, size } = require('lodash/fp');
+
 
 const { ASSOCIATED_USER_KEYS, POSSIBLE_USER_KEYS } = require('../constants');
 
@@ -99,6 +101,10 @@ const groupByMultipleKeys = ([key, ...keys], Logger, agg = {}) => (objs) => {
 };
 
 const getFirstValue = (obj, [key, ...keys]) =>
-  obj[key] !== undefined ? obj[key] : keys.length ? getFirstValue(obj, keys) : undefined;
+  get(key, obj) !== undefined
+    ? get(key, obj)
+    : size(keys)
+    ? getFirstValue(obj, keys)
+    : undefined;
 
 module.exports = getAssociatedUsers;

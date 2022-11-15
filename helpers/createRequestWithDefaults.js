@@ -1,11 +1,12 @@
 const fs = require('fs');
-const { map, get, identity } = require('lodash/fp');
+const { map, get, identity, compact, includes, getOr } = require('lodash/fp');
 const { parallelLimit } = require('async');
 const request = require('postman-request');
 
 const getAuthToken = require('./getAuthToken');
 
 const SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES = [200];
+const RETRY_STATUS_CODES = [401, 403];
 const { MAX_AUTH_RETRIES } = require('./constants');
 
 const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
@@ -55,17 +56,23 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       let postRequestFunctionResults;
       try {
         const result = await _requestWithDefaults(_requestOptions);
-        checkForStatusError(result, _requestOptions);
+
+        checkForStatusError(result, { ..._requestOptions, json: bodyWillBeJSON });
 
         postRequestFunctionResults = await postRequestSuccessFunction(
           result,
           _requestOptions
         );
+        const firstCharacterIsJSON = includes('{', get('body.0', result));
 
         postRequestFunctionResults = await postRequestSuccessFunction(
           {
             ...result,
-            body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
+            body:
+              firstCharacterIsJSON && bodyWillBeJSON
+                ? JSON.parse(result.body)
+                : result.body
+            // body: JSON.parse(result.body)
           },
           _requestOptions
         );
@@ -81,13 +88,15 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
 
   const checkForStatusError = ({ statusCode, body }, requestOptions) => {
     const requestOptionsWithoutSensitiveData = {
-      ...requestOptions,
-      options: '{...}',
-      headers: {
-        ...requestOptions.headers,
-        Authorization: 'Bearer ****************'
-      }
+      ...requestOptions
+      // options: '{...}',
+      // headers: {
+      //   ...requestOptions.headers,
+      //   Authorization: 'Bearer ****************'
+      // }
     };
+
+    Logger.trace({ CHECK_FOR_STATUS: statusCode, body, requestOptions });
 
     const roundedStatus = Math.round(statusCode / 100) * 100;
     const statusCodeNotSuccessful = !SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(
@@ -98,7 +107,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       const requestError = Error('Request Error');
       requestError.status = statusCodeNotSuccessful ? statusCode : body.error;
       requestError.description = JSON.stringify(body);
-      requestError.requestOptions = JSON.stringify(requestOptionsWithoutSensitiveData);
+      requestError.requestOptions = JSON.stringify(requestOptions);
       throw requestError;
     }
   };
@@ -106,7 +115,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
   const handleAuth = async (requestOptions) => {
     const isAuthRequest = get('headers.validity', requestOptions);
     const requestWithDefaults = requestWithDefaultsBuilder();
-    
+
     if (!isAuthRequest) {
       const token = await getAuthToken(
         get('headers', requestOptions),
@@ -130,20 +139,32 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     return requestOptions;
   };
 
-  const handleAndReformatErrors = (err) => {
-    if (err.requestOptions) {
-      const retryCount = (err.requestOptions && err.requestOptions.retryCount) || 0;
+  const handleAndReformatErrors = async (err) => {
+    const parsedErr = parseErrorToReadableJSON(err);
+
+    if (parsedErr.requestOptions) {
+      const parsedRequestOptions = JSON.parse(parsedErr.requestOptions);
+      const retryCount = getOr(0, 'retryCount', parsedRequestOptions);
 
       const needToRetryRequest =
-        err.status === 403 && err.requestOptions && retryCount <= MAX_AUTH_RETRIES;
+        RETRY_STATUS_CODES.includes(parsedErr.status) && retryCount < MAX_AUTH_RETRIES;
 
       if (needToRetryRequest) {
-        const { username, password } = err.requestOptions.headers;
+        const { username, password } = getOr({}, 'requestOptions.headers', parsedErr);
+
         const authCacheKey = `${username}${password}`;
         tokenCache.del(authCacheKey);
 
-        return requestDefaultsWithInterceptors({
-          ...err.requestOptions,
+        const requestWithDefaults = requestWithDefaultsBuilder(
+          handleAuth,
+          identity,
+          handleAndReformatErrors
+        );
+
+        parsedRequestOptions.token = undefined;
+
+        return await requestWithDefaults({
+          ...parsedRequestOptions,
           retryCount: retryCount + 1
         });
       } else {
@@ -173,7 +194,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         requestsOptions
       );
 
-      return parallelLimit(unexecutedRequestFunctions, limit);
+      return compact(parallelLimit(unexecutedRequestFunctions, limit));
     } catch (error) {
       const err = parseErrorToReadableJSON(error);
       Logger.trace({ err }, 'error in requestsInParallel');

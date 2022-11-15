@@ -6,21 +6,24 @@ const getIncidents = require('./getIncidents');
 const getUsersByEmail = require('./createLookupResults/getUsersByEmail');
 const getTpi = require('./createLookupResults/getTpi');
 const getRiskHistory = require('./createLookupResults/getRiskHistory');
-const getAssets = require('./createLookupResults/getAssests');
+const getAssets = require('./createLookupResults/getAssets');
+const { compact } = require('lodash/fp');
+
+// ** TODO: make sure users results bring consistent with searching multiple entities - with user email
 
 const getLookupResults = async (entity, options, requestFunctions, Logger) => {
-  const incidents = options.searchIncidents
-    ? await getIncidents(entity, options, requestFunctions.requestsInParallel, Logger)
-    : {};
-  Logger.trace({ incidents }, 'incidents response');
-
   const violations = await getViolationResponse(
     entity,
     options,
     requestFunctions.requestsInParallel,
     Logger
   );
-  Logger.trace({ violations }, 'violations response');
+
+  // const users = [];
+  // const tpi = [];
+  // const assets = [];
+  // const riskscore = [];
+  // const violations = [];
 
   const users = await getUsersByEmail(
     entity,
@@ -28,10 +31,8 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     requestFunctions.requestsInParallel,
     Logger
   );
-  Logger.trace({ users }, 'users response');
 
   const tpi = await getTpi(entity, options, requestFunctions.requestsInParallel, Logger);
-  Logger.trace({ tpi }, 'tpi response');
 
   const assets = await getAssets(
     entity,
@@ -39,7 +40,6 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     requestFunctions.requestsInParallel,
     Logger
   );
-  Logger.trace({ assets }, 'assets response');
 
   const riskscore = await getRiskHistory(
     entity,
@@ -47,7 +47,6 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     requestFunctions.requestsInParallel,
     Logger
   );
-  Logger.trace({ riskscore }, 'riskscore response');
 
   const responses = {
     violation: {
@@ -82,7 +81,9 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     }
   };
 
-  const lookupResults = await createLookupResults(responses, entity, incidents, Logger);
+  Logger.trace({ RESPONSES: responses });
+
+  const lookupResults = await createLookupResults(responses, entity, Logger);
 
   return lookupResults;
 };

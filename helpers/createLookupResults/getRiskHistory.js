@@ -27,7 +27,6 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
       Logger
     );
 
-    Logger.trace({ riskscoreResponse }, 'Riskscore Results');
     return flatten(riskscoreResponse);
   } catch (err) {
     Logger.error({ ERR: err });

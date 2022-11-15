@@ -31,7 +31,6 @@ const getViolationResponse = async (entity, options, requestsInParallel, Logger)
       Logger
     );
 
-    Logger.trace({ violationResults }, 'Violation Results');
     return flatten(violationResults);
   } catch (err) {
     throw err;

@@ -26,7 +26,6 @@ const getAssets = async (entity, options, requestsInParallel, Logger) => {
       Logger
     );
 
-    Logger.trace({ assetResponse }, 'Asset Results');
     return flatten(assetResponse);
   } catch (err) {
     Logger.error({ ERR: err });

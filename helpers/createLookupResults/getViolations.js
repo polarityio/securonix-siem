@@ -1,5 +1,17 @@
 const _ = require('lodash');
-const { flow, isEqual, pick, find, omit } = require('lodash/fp');
+const {
+  flow,
+  isEqual,
+  pick,
+  find,
+  omit,
+  getOr,
+  get,
+  concat,
+  uniq,
+  compact,
+  isEmpty
+} = require('lodash/fp');
 
 const {
   VIOLATION_KEYS,
@@ -54,9 +66,9 @@ const _getViolationsWithDuplicates = (
   });
 
 const _getViolationKeys = (violation, entityGroupType) =>
-  VIOLATION_KEYS[entityGroupType].reduce((agg, violationKey) => {
-    const violationValue = violation[violationKey];
-    return violationValue && violationValue !== 'null'
+  getOr([], entityGroupType, VIOLATION_KEYS).reduce((agg, violationKey) => {
+    const violationValue = get(violationKey, violation);
+    return violationValue
       ? {
           ...agg,
           [violationKey]: violationValue
@@ -78,7 +90,7 @@ const _removeDuplicateViolations = (
 
     return _aggregateViolation(similarViolationIndex, agg, violation);
   }, []);
-  return violations;
+  return compact(violations);
 };
 
 const _aggregateViolation = (similarViolationIndex, agg, violation) => {
@@ -86,25 +98,33 @@ const _aggregateViolation = (similarViolationIndex, agg, violation) => {
   violationDateTime = _.parseInt(violationDateTime) || violationDateTime;
 
   if (similarViolationIndex !== -1) {
-    const aggEventTimes = _.chain(agg[similarViolationIndex].datetime)
-      .concat(violationDateTime)
-      .uniq()
-      .value();
+    const aggEventTimes = flow(
+      get([similarViolationIndex, 'datetime']),
+      concat(violationDateTime),
+      uniq,
+      compact
+    )(agg);
 
-    return _.set(agg, `[${similarViolationIndex}]`, {
-      ...agg[similarViolationIndex],
-      datetime: aggEventTimes,
-      violationCount: aggEventTimes.length
-    });
+    const eventTimes = aggEventTimes.length;
+
+    return eventTimes
+      ? _.set(agg, `[${similarViolationIndex}]`, {
+          ...agg[similarViolationIndex],
+          datetime: aggEventTimes,
+          violationCount: aggEventTimes.length
+        })
+      : agg;
   } else {
-    return [
-      ...agg,
-      {
-        ...violation,
-        datetime: violationDateTime ? [violationDateTime] : undefined,
-        violationCount: 1
-      }
-    ];
+    return !isEmpty(violation.allFields)
+      ? [
+          ...agg,
+          {
+            ...violation,
+            datetime: violationDateTime ? [violationDateTime] : undefined,
+            violationCount: 1
+          }
+        ]
+      : agg;
   }
 };
 

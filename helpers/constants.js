@@ -1,6 +1,8 @@
 const POSSIBLE_TIME_KEYS = ['eventtime', 'datetime'];
 const POSSIBLE_USER_KEYS = ['u_workemail', 'sourceusername', 'accountname', 'tenantname'];
 
+const MAX_AUTH_RETRIES = 15;
+
 const ASSOCIATED_USER_KEYS = [
   ...POSSIBLE_USER_KEYS,
   'u_fullname',
@@ -139,5 +141,6 @@ module.exports = {
   POSSIBLE_USER_KEYS,
   INCIDENT_QUERY_PATHS,
   INCIDENT_PAGE_SIZE,
-  QUERY_SORT_KEYS
+  QUERY_SORT_KEYS,
+  MAX_AUTH_RETRIES
 };

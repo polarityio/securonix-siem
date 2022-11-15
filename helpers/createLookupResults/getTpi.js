@@ -29,18 +29,11 @@ const getTpi = async (entity, options, requestsInParallel, Logger) => {
       Logger
     );
 
-    Logger.trace({ tpiResponse }, 'User By Emails Results');
     return flatten(tpiResponse);
   } catch (err) {
     Logger.error({ ERR: err });
     throw err;
   }
-};
-
-const transformType = async (entity) => {
-  if (entity.isIP) return 'ip';
-  if (entity.isDomain) return 'domain';
-  if (entity.isEmail) return 'email';
 };
 
 module.exports = getTpi;

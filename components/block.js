@@ -4,7 +4,7 @@ polarity.export = PolarityComponent.extend({
     return Intl.DateTimeFormat().resolvedOptions().timeZone;
   }),
   watchListHasBeenCalled: false,
-  tabNames: ['violation', 'associatedUsers', 'incidents', 'users', 'riskscore', 'tpi'],
+  tabNames: ['violation', 'associatedUsers', 'users', 'riskscore', 'tpi'],
   watchLists: null,
   activeTab: '',
   expandableTitleStates: {

@@ -1,5 +1,5 @@
 const _ = require('lodash');
-const { flow, size, get, getOr, orderBy } = require('lodash/fp');
+const { compact, flow, size, get, getOr, orderBy } = require('lodash/fp');
 
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
@@ -9,34 +9,33 @@ const createLookupResults = async (responses, entity, foundIncidents, Logger) =>
   return polarityResponse(entity, lookupResults, Logger);
 };
 
-const getLookupResults = async (responses, entity, foundIncidents, Logger) => {
+const getLookupResults = async (responses, entity, Logger) => {
   let processedResponses;
 
   const processedViolationResponse = await processesViolationResponse(
     responses,
     entity,
-    foundIncidents,
     Logger
   );
 
   // sorts responses and returns the results associated with the query type in an object.
   for (let [queryKey, response] of Object.entries(responses)) {
     if (get('length', response.value)) {
-      processedResponses = processResponses(queryKey, response.value, Logger);
+      processedResponses = processResponses(queryKey, response, Logger);
     }
   }
 
   return (results = { ...processedResponses, ...processedViolationResponse });
 };
 
-const processResponses = (responseKey, responseValue) => {
-  const { direction, key } = getOr({}, responseKey, responseValue);
-  const sortedQueryResults = orderBy(key, direction, responseValue);
+const processResponses = (responseKey, response, Logger) => {
+  const { direction, key } = getOr({}, responseKey, response);
+  const sortedQueryResults = orderBy(key, direction, response.value);
 
   return { [responseKey]: sortedQueryResults };
 };
 
-const processesViolationResponse = async (responses, entity, foundIncidents, Logger) => {
+const processesViolationResponse = async (responses, entity, Logger) => {
   const associatedUsers = getAssociatedUsers(responses.violation.value, Logger);
 
   const violations = getViolations(
@@ -46,22 +45,17 @@ const processesViolationResponse = async (responses, entity, foundIncidents, Log
     Logger
   );
 
-  const incidents = foundIncidents[entity.value];
-
   // conditionally adding properties to violation response, property wont be added if there is no data.
   return {
     ...(get('length', associatedUsers) && { associatedUsers: associatedUsers }),
     ...(get('length', violations) && {
       violation: violations
-    }),
-    ...(get('length', incidents) && {
-      incidents: incidents
     })
   };
 };
 
 const polarityResponse = (entity, details, Logger) => {
-  return get('length', Object.keys(details))
+  return get('length', Object.values(details))
     ? {
         entity,
         data: {
@@ -103,7 +97,6 @@ const createSummaryTags = (apiData, Logger) => {
   const asset = getPathSize('asset');
   if (asset) tags.push(`Asset: ${asset}`);
 
-  Logger.trace({ tags }, 'List of tags');
   return tags;
 };
 

@@ -32,7 +32,6 @@ const getUsersByEmail = async (entity, options, requestsInParallel, Logger) => {
       Logger
     );
 
-    Logger.trace({ userByEmailResults }, 'User By Emails Results');
     return flatten(userByEmailResults);
   } catch (error) {
     const err = parseErrorToReadableJSON(error);

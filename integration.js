@@ -9,6 +9,9 @@ const { TIME_FOR_TOKEN_DAYS } = require('./helpers/constants');
 const handleError = require('./helpers/handleError');
 const { getLookupResults } = require('./helpers/getLookupResults');
 
+const parseErrorToReadableJSON = (error) =>
+  JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+
 let Logger;
 let requestFunctions;
 
@@ -53,8 +56,9 @@ const doLookup = async (entities, options, cb) => {
     Logger.trace({ lookupResults });
     return cb(null, lookupResults);
   } catch (error) {
-    Logger.error({ error }, 'Get Lookup Results Failed');
-    return cb(handleError(error));
+    const err = parseErrorToReadableJSON(error);
+    Logger.error({ err }, 'Get Lookup Results Failed');
+    return cb({ detail: error.message || 'Lookup Failed', err });
   }
 };
 
