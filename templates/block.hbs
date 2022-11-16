@@ -295,7 +295,7 @@
             class='expandable-title'
             {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
           >
-            <span class='text'>Times Violation Occurred ({{violation.violationCount}}):</span>
+            <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
             {{fa-icon 'angle-up'}}
           </a>
           <div class='wrap-container'>
@@ -313,11 +313,12 @@
             class='expandable-title'
             {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
           >
-            <span class='text'>Times Violation Occurred ({{violation.violationCount}}):</span>
+            <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
             {{fa-icon 'angle-down'}}
           </a>
         {{/if}}
       {{/if}}
+
       {{#if (get expandableTitleStates.allFields index)}}
         <a
           href='#'
@@ -341,85 +342,7 @@
           {{fa-icon 'angle-down'}}
         </a>
       {{/if}}
-      {{#if (get expandableTitleStates.watchList index)}}
-        <a
-          href='#'
-          class='expandable-title'
-          {{on 'click' (action 'toggleExpandableTitle' index 'watchList')}}
-        >
-          <span class='text'>Watchlists </span>
-          {{fa-icon 'angle-up'}}
-        </a>
-        <div class='wrap-container'>
-          <div>
-            <span class='p-key'>Domain Admin:</span>
-            <span class='p-value'>{{watchLists.Domain_Admin}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Flight Risk:</span>
-            <span class='p-value'>{{watchLists.Flight_Risk_Users_Watchlist}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Recent Transfers:</span>
-            <span class='p-value'>{{watchLists.Recent_Transfers}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Exiting Behavior:</span>
-            <span class='p-value'>{{watchLists.Exiting_Behavior_Watchlist}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Bad Performance:</span>
-            <span class='p-value'>{{watchLists.Bad_Performance_Review}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Bad Performance:</span>
-            <span class='p-value'>{{watchLists.Bad_Performance_Review}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Terminated Contractors:</span>
-            <span class='p-value'>{{watchLists.Terminated_Contractors}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Contractors Upcoming Termination:</span>
-            <span class='p-value'>{{watchLists.Contractors-UpComing_Termination}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Kognition:</span>
-            <span class='p-value'>{{watchLists.Kognition}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Privileged Accounts:</span>
-            <span class='p-value'>{{watchLists.Privileged_Accounts}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Terminated Employees:</span>
-            <span class='p-value'>{{watchLists.Terminated_Employees}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Privileged Users:</span>
-            <span class='p-value'>{{watchLists.Privileged_Users}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Recent Hires:</span>
-            <span class='p-value'>{{watchLists.Recent_Hires}}</span>
-          </div>
-          <div>
-            <span class='p-key'>Employee Upcoming Termination:</span>
-            <span class='p-value'>{{watchLists.Employees-UpComing_Terminations}}</span>
-          </div>
-        </div>
-      {{else}}
-        <a
-          href='#'
-          class='expandable-title'
-          {{on 'click' (action 'toggleExpandableTitle' index 'watchList')}}
-        >
-          <span class='text'>Watchlists:</span>
-          {{fa-icon 'angle-down'}}
-        </a>
-      {{/if}}
     {{/each}}
-
     {{#if (gte details.violations.length details.violationsMaxResultCount)}}
       <hr />
       <div class='view-in-ts end'>
@@ -431,6 +354,7 @@
     {{/if}}
   </div>
 {{/if}}
+
 
 {{#if (eq activeTab 'associatedUsers')}}
   <div class='view-in-ts'>

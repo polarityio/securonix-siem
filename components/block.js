@@ -9,8 +9,7 @@ polarity.export = PolarityComponent.extend({
   activeTab: '',
   expandableTitleStates: {
     allFields: {},
-    datetime: {},
-    watchList: {}
+    datetime: {}
   },
   init () {
     const activeTab = this.tabNames
@@ -26,9 +25,6 @@ polarity.export = PolarityComponent.extend({
       this.set('activeTab', tabName);
     },
     toggleExpandableTitle: function (index, type) {
-      if (type === 'watchList' && !this.watchListHasBeenCalled) {
-        this.getWatchLists();
-      }
       const modifiedExpandableTitleStates = Object.assign(
         {},
         this.get(`expandableTitleStates.${type}`),
@@ -38,20 +34,5 @@ polarity.export = PolarityComponent.extend({
       );
       this.set(`expandableTitleStates.${type}`, modifiedExpandableTitleStates);
     }
-  },
-  getWatchLists: function () {
-    this.sendIntegrationMessage({
-      action: 'getWatchLists'
-    })
-      .then((response) => {
-        this.set('watchLists', response.body.result);
-      })
-      .catch((err) => {
-        // set message
-        console.log(err);
-      })
-      .finally(() => {
-        this.set('watchListHasBeenCalled', true);
-      });
   }
 });

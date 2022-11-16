@@ -7,10 +7,11 @@ const {
   omit,
   getOr,
   get,
-  concat,
-  uniq,
-  compact,
-  isEmpty
+  uniqWith,
+  filter,
+  eq,
+  map,
+  parseInt
 } = require('lodash/fp');
 
 const {
@@ -31,10 +32,7 @@ const getViolations = (associatedUsers, violationEvents, entityGroupType, Logger
     (key) => !anyEqual(key, POSSIBLE_TIME_KEYS)
   );
 
-  const uniqueViolations = _removeDuplicateViolations(
-    violationsWithDuplicates,
-    violationKeysWithoutTime
-  );
+  const uniqueViolations = getUniqueViolationsWithAggDatetimes(violationsWithDuplicates);
 
   const uniqueViolationsWithAllFields = addAllFieldsToViolations(
     uniqueViolations,
@@ -44,6 +42,21 @@ const getViolations = (associatedUsers, violationEvents, entityGroupType, Logger
 
   return uniqueViolationsWithAllFields;
 };
+
+const getUniqueViolationsWithAggDatetimes = (violationsWithDuplicates) =>
+  flow(
+    map(omit(POSSIBLE_TIME_KEYS)),
+    uniqWith(isEqual),
+    map((uniqViolationEvent) => ({
+      ...uniqViolationEvent,
+      datetime: flow(
+        filter(
+          flow(get('riskthreatname'), eq(get('riskthreatname', uniqViolationEvent)))
+        ),
+        map(flow(get('datetime'), parseInt(10)))
+      )(violationsWithDuplicates)
+    }))
+  )(violationsWithDuplicates);
 
 const _getViolationsWithDuplicates = (
   violationEvents,
@@ -58,7 +71,6 @@ const _getViolationsWithDuplicates = (
         (userKey) => associatedUser[userKey] === violation[userKey]
       )
     );
-
     return {
       ...(associatedUser && { associatedUser }),
       ..._getViolationKeys(violation, entityGroupType)
@@ -75,58 +87,6 @@ const _getViolationKeys = (violation, entityGroupType) =>
         }
       : agg;
   }, {});
-
-const _removeDuplicateViolations = (
-  violationsWithDuplicates,
-  violationKeysWithoutTime
-) => {
-  const violations = violationsWithDuplicates.reduce((agg, violation) => {
-    const similarViolationIndex = agg.findIndex((aggViolation) =>
-      _.isEqual(
-        _.pick(violation, violationKeysWithoutTime),
-        _.pick(aggViolation, violationKeysWithoutTime)
-      )
-    );
-
-    return _aggregateViolation(similarViolationIndex, agg, violation);
-  }, []);
-  return compact(violations);
-};
-
-const _aggregateViolation = (similarViolationIndex, agg, violation) => {
-  let violationDateTime = getFirstValue(violation, POSSIBLE_TIME_KEYS);
-  violationDateTime = _.parseInt(violationDateTime) || violationDateTime;
-
-  if (similarViolationIndex !== -1) {
-    const aggEventTimes = flow(
-      get([similarViolationIndex, 'datetime']),
-      concat(violationDateTime),
-      uniq,
-      compact
-    )(agg);
-
-    const eventTimes = aggEventTimes.length;
-
-    return eventTimes
-      ? _.set(agg, `[${similarViolationIndex}]`, {
-          ...agg[similarViolationIndex],
-          datetime: aggEventTimes,
-          violationCount: aggEventTimes.length
-        })
-      : agg;
-  } else {
-    return !isEmpty(violation.allFields)
-      ? [
-          ...agg,
-          {
-            ...violation,
-            datetime: violationDateTime ? [violationDateTime] : undefined,
-            violationCount: 1
-          }
-        ]
-      : agg;
-  }
-};
 
 const addAllFieldsToViolations = (uniqueViolations, violationEvents) =>
   _.map(uniqueViolations, (uniqueViolation) => ({

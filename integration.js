@@ -38,6 +38,7 @@ const doLookup = async (entities, options, cb) => {
   try {
     lookupResults = await Promise.all(
       map(async (searchedEntity) => {
+        
         const entity = {
           ...searchedEntity,
           transformedEntityType: transformType(searchedEntity)
@@ -58,32 +59,9 @@ const doLookup = async (entities, options, cb) => {
   } catch (error) {
     const err = parseErrorToReadableJSON(error);
     Logger.error({ err }, 'Get Lookup Results Failed');
-    return cb({ detail: error.message || 'Lookup Failed', err });
+    return cb(handleError(err))
+    // return cb({ detail: error.message || 'Lookup Failed', err });
   }
-};
-
-const getWatchLists = async (options, requestWithDefaults, Logger) => {
-  const response = await requestWithDefaults({
-    uri: `${options.url}/Snypr/ws/incident/listWatchlist`,
-    headers: {
-      username: options.username,
-      password: options.password,
-      baseUrl: options.url
-    },
-    json: true
-  });
-  return response;
-};
-
-const onMessage = async (payload, options, cb) => {
-  const actions = {
-    getWatchLists: await getWatchLists(
-      options,
-      requestFunctions.requestWithDefaults,
-      Logger
-    )
-  };
-  return cb(null, actions[payload.action]);
 };
 
 const validateOptions = (options, callback) =>
@@ -92,6 +70,5 @@ const validateOptions = (options, callback) =>
 module.exports = {
   doLookup,
   startup,
-  onMessage,
   validateOptions
 };

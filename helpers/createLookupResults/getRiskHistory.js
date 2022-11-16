@@ -1,6 +1,9 @@
 const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
+const parseErrorToReadableJSON = (error) =>
+  JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+
 const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
   try {
     const { riskscore } = QUERY_KEYS;
@@ -28,7 +31,8 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
     );
 
     return flatten(riskscoreResponse);
-  } catch (err) {
+  } catch (error) {
+    const err = parseErrorToReadableJSON(error);
     Logger.error({ ERR: err });
     throw err;
   }

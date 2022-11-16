@@ -194,7 +194,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
         requestsOptions
       );
 
-      return compact(parallelLimit(unexecutedRequestFunctions, limit));
+      return compact(await parallelLimit(unexecutedRequestFunctions, limit));
     } catch (error) {
       const err = parseErrorToReadableJSON(error);
       Logger.trace({ err }, 'error in requestsInParallel');

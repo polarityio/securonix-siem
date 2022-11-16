@@ -1,6 +1,9 @@
 const { map, flatten } = require('lodash/fp');
 const { QUERY_KEYS } = require('../constants');
 
+const parseErrorToReadableJSON = (error) =>
+  JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
+
 const getTpi = async (entity, options, requestsInParallel, Logger) => {
   try {
     const { tpi } = QUERY_KEYS;
@@ -30,7 +33,8 @@ const getTpi = async (entity, options, requestsInParallel, Logger) => {
     );
 
     return flatten(tpiResponse);
-  } catch (err) {
+  } catch (error) {
+    const err = parseErrorToReadableJSON(error);
     Logger.error({ ERR: err });
     throw err;
   }
