@@ -1,5 +1,4 @@
 const _ = require('lodash');
-const getAllIncidents = require('./getIncidents/getAllIncidents');
 
 const validateOptions = async (requestWithDefaults, Logger, options, callback) => {
   const stringOptionsErrorMessages = {
