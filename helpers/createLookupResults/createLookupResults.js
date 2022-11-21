@@ -1,18 +1,17 @@
-const _ = require('lodash');
 const { flow, size, get, getOr, orderBy } = require('lodash/fp');
 
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
 
-const createLookupResults = async (responses, entity, foundIncidents, Logger) => {
-  const lookupResults = await getLookupResults(responses, entity, foundIncidents, Logger);
+const createLookupResults = (responses, entity, foundIncidents, Logger) => {
+  const lookupResults = getLookupResults(responses, entity, foundIncidents, Logger);
   return polarityResponse(entity, lookupResults, Logger);
 };
 
-const getLookupResults = async (responses, entity, Logger) => {
+const getLookupResults = (responses, entity, Logger) => {
   let processedResponses;
 
-  const processedViolationResponse = await processesViolationResponse(
+  const processedViolationResponse = processesViolationResponse(
     responses,
     entity,
     Logger
@@ -35,7 +34,7 @@ const processResponses = (responseKey, response) => {
   return { [responseKey]: sortedQueryResults };
 };
 
-const processesViolationResponse = async (responses, entity, Logger) => {
+const processesViolationResponse = (responses, entity, Logger) => {
   const associatedUsers = getAssociatedUsers(responses.violation.value, Logger);
 
   const violations = getViolations(

@@ -44,7 +44,7 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
 
   Logger.trace({ RESPONSES: responses });
 
-  const lookupResults = await createLookupResults(responses, entity, Logger);
+  const lookupResults = createLookupResults(responses, entity, Logger);
 
   return lookupResults;
 };
