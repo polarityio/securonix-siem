@@ -1,7 +1,7 @@
 module.exports = {
   name: 'Securonix',
   acronym: 'SX',
-  description: 'Search Securonix for user Violation information',
+  description: 'Search Securonix for User Violation and Incident information on Emails, Domains, and IPs',
   entityTypes: [
     'ipv4',
     'email',
@@ -68,16 +68,6 @@ module.exports = {
       description: 'Password for the provided Securonix username',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'searchForEmployeeId',
-      name: 'Search For Employee ID',
-      description:
-        'If enabled, the integration will search Securonix for Employee IDs in the specified Channel.  This option should be used in conjunction with a Channel Entity Filter on the "Annotated Entities" entity type.',
-      default: true,
-      type: 'boolean',
       userCanEdit: true,
       adminOnly: false
     },
