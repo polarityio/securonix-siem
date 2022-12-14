@@ -1,5 +1,5 @@
 .time-container {
-  background-color: #ccc;
+  background-color: #ddd;
   padding-left: 5px;
   padding-right: 5px;
   padding-top: 1px;
@@ -12,6 +12,7 @@
 
 .view-in-ts {
   padding-top: 13px;
+
   &.end {
     padding-top: 8px;
     padding-bottom: 15px;
@@ -28,12 +29,33 @@
   font-weight: 600;
   margin-top: 5px;
   margin-bottom: 5px;
+
   .text {
     color: #5ccd18 !important;
     border-bottom: 1px solid #5ccd18;
+
     .desc {
       color: black !important;
       font-weight: 400 !important;
     }
   }
+}
+
+pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.p-block {
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.scrollable-container {
+  max-height: 300px;
+  overflow-y: scroll;
+  border: 1px solid #dee2e6;
+  padding: 5px;
+  border-radius: 3px;
+  margin-top: 3px;
 }
