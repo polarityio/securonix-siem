@@ -18,12 +18,18 @@ polarity.export = PolarityComponent.extend({
     'block._state.violation.startItem',
     function () {
       let originalViolations = this.get('details.violation');
+      let itemsPerPage = this.get('itemsPerPage');
+      let pageNumber = this.get('block._state.violation.pageNumber');
       let slicedViolations;
 
       slicedViolations = originalViolations.slice(
         this.get('block._state.violation.startItem') - 1,
         this.get('block._state.violation.endItem')
       );
+
+      slicedViolations.forEach((violation, index) => {
+        violation.index = (pageNumber - 1) * itemsPerPage + (index + 1);
+      });
 
       return slicedViolations;
     }
@@ -79,7 +85,8 @@ polarity.export = PolarityComponent.extend({
       }
 
       const startItem = (tempPageNumber - 1) * perPage + 1;
-      const endItem = tempPageNumber * perPage > totalItems ? totalItems : tempPageNumber * perPage;
+      const endItem =
+        tempPageNumber * perPage > totalItems ? totalItems : tempPageNumber * perPage;
 
       this.set('block._state.violation.startItem', startItem);
       this.set('block._state.violation.endItem', endItem);
