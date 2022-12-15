@@ -42,7 +42,7 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
     // }
   };
 
-  Logger.trace({ RESPONSES: responses });
+  Logger.trace({ responses }, 'Responses from lookups');
 
   const lookupResults = createLookupResults(responses, entity, Logger);
 
