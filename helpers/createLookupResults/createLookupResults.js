@@ -1,71 +1,99 @@
-const _ = require('lodash');
+const { flow, size, get, getOr, orderBy } = require('lodash/fp');
 
-const getViolationsForThisEntity = require('./getViolationsForThisEntity');
 const getAssociatedUsers = require('./getAssociatedUsers');
 const getViolations = require('./getViolations');
-const { MAX_VIOLATION_RESULTS, MAX_INCIDENTS_RESULTS } = require('../constants');
 
-const createLookupResults = (
-  url,
-  entityGroups,
-  { body: { events } },
-  incidents,
-  Logger
-) =>
-  _.flatMap(entityGroups, (groupEntities, entityGroupType) =>
-    groupEntities.map(
-      _getLookupResultForThisEntity(url, events, entityGroupType, incidents, Logger)
-    )
+const createLookupResults = (responses, entity, foundIncidents, Logger) => {
+  const lookupResults = getLookupResults(responses, entity, foundIncidents, Logger);
+  return polarityResponse(entity, lookupResults, Logger);
+};
+
+const getLookupResults = (responses, entity, Logger) => {
+  let processedResponses;
+
+  const processedViolationResponse = processesViolationResponse(
+    responses,
+    entity,
+    Logger
   );
 
-const _getLookupResultForThisEntity =
-  (url, events, entityGroupType, foundIncidents, Logger) => (entity) => {
-    const violationEventsForThisEntity = getViolationsForThisEntity(
-      events,
-      entity,
-      entityGroupType
-    );
+  // sorts responses and returns the results associated with the query type in an object.
+  for (let [queryKey, response] of Object.entries(responses)) {
+    if (get('length', response.value)) {
+      processedResponses = processResponses(queryKey, response, Logger);
+    }
+  }
 
-    const associatedUsers = getAssociatedUsers(violationEventsForThisEntity, Logger);
+  return (results = { ...processedResponses, ...processedViolationResponse });
+};
 
-    const violations = getViolations(
-      associatedUsers,
-      violationEventsForThisEntity,
-      entityGroupType
-    );
+const processResponses = (responseKey, response) => {
+  const { direction, key } = getOr({}, responseKey, response);
+  const sortedQueryResults = orderBy(key, direction, response.value);
 
-    const violationsCount = violations.reduce(
-      (agg, violation) => agg + violation.violationCount,
-      0
-    );
+  return { [responseKey]: sortedQueryResults };
+};
 
-    const incidents = foundIncidents[entity.value];
+const processesViolationResponse = (responses, entity, Logger) => {
+  const associatedUsers = getAssociatedUsers(responses.violation.value, Logger);
 
-    return {
-      entity,
-      data:
-        violationsCount || _.size(incidents)
-          ? {
-              details: {
-                associatedUsers,
-                violations: _.chain(violations)
-                  .orderBy('violationCount', 'desc')
-                  .slice(0, MAX_VIOLATION_RESULTS)
-                  .value(),
-                violationsCount,
-                spotterUrl: `${url}/Snypr/spotter/loadDashboard`,
-                MAX_VIOLATION_RESULTS,
-                incidentsCount: _.size(incidents),
-                incidents: _.chain(incidents)
-                  .orderBy('lastUpdateDate', 'desc')
-                  .slice(0, MAX_INCIDENTS_RESULTS)
-                  .value(),
-                MAX_INCIDENTS_RESULTS,
-                incidentUrl: `${url}/Snypr/configurableDashboards/view?menuname=Incident Management&section=10`
-              }
-            }
-          : null
-    };
+  const violations = getViolations(
+    associatedUsers,
+    responses.violation.value,
+    entity.transformedEntityType,
+    Logger
+  );
+
+  // conditionally adding properties to violation response, property wont be added if there is no data.
+  return {
+    ...(get('length', associatedUsers) && { associatedUsers: associatedUsers }),
+    ...(get('length', violations) && {
+      violation: violations
+    })
   };
+};
+
+const polarityResponse = (entity, details, Logger) => {
+  return get('length', Object.values(details))
+    ? {
+        entity,
+        data: {
+          summary: createSummaryTags(details, Logger),
+          details
+        }
+      }
+    : emptyResponse(entity);
+};
+
+const emptyResponse = (entity) => ({
+  entity,
+  data: null
+});
+
+const createSummaryTags = (apiData) => {
+  let tags = [];
+
+  const getPathSize = (path) => flow(get(path), size)(apiData);
+
+  const userSize = getPathSize('users');
+  if (userSize) tags.push(`User Size: ${userSize}`);
+
+  const violationSize = getPathSize('violation');
+  if (violationSize) tags.push(`Violations: ${violationSize}`);
+
+  const associatedUsers = getPathSize('associatedUsers');
+  if (associatedUsers) tags.push(`Associated Users: ${associatedUsers}`);
+
+  const tpi = getPathSize('tpi');
+  if (tpi) tags.push(`TPI: ${tpi}`);
+
+  const riskscore = getPathSize('riskscore');
+  if (riskscore) tags.push(`Risk Score: ${riskscore}`);
+
+  const asset = getPathSize('asset');
+  if (asset) tags.push(`Asset: ${asset}`);
+
+  return tags;
+};
 
 module.exports = createLookupResults;

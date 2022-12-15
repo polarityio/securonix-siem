@@ -1,34 +1,49 @@
-const buildViolationQueryParams = require("./buildViolationQueryParams");
+const m = require('moment');
+const { map, flatten } = require('lodash/fp');
+const { QUERY_KEYS } = require('./constants');
 
-const getViolationResponse = (entityGroups, options, requestWithDefaults, Logger) =>
-  requestWithDefaults({
-    uri: `${options.url}/Snypr/ws/spotter/index/search`,
-    headers: {
-      username: options.username,
-      password: options.password,
-      baseUrl: options.url
-    },
-    qs: buildViolationQueryParams(entityGroups, options.monthsBack),
-    json: true
-  })
-    .then(_checkForInternalSecuronixError(Logger))
-    .catch((error) => {
-      Logger.error({ error }, 'Violation Query Error');
-      throw error;
-    });
+const getViolationResponse = async (entity, options, requestsInParallel, Logger) => {
+  try {
+    const { violation } = QUERY_KEYS;
+    const ViolationKeys = violation[entity.transformedEntityType];
 
-const _checkForInternalSecuronixError = (Logger) => (response) => {
-  const {
-    body: { error, errorMessage }
-  } = response;
-  Logger.trace({ error, errorMessage, response }, 'Get Violations Request');
-  if (error || errorMessage) {
-    const internalSecuronixError = Error('Internal Securonix Query Error');
-    internalSecuronixError.status = 'internalSecuronixError';
-    internalSecuronixError.description = errorMessage || error;
-    throw internalSecuronixError;
+    const violationRequestsOptions = map(
+      (queryKey) => ({
+        uri: `${options.url}/Snypr/ws/spotter/index/search`,
+        headers: {
+          username: options.username,
+          password: options.password,
+          baseUrl: options.url
+        },
+        qs: {
+          ..._getTimeframeParams(options.monthsBack),
+          query: `index=violation AND ${queryKey}=${entity.value}`
+        },
+        json: true
+      }),
+      ViolationKeys
+    );
+
+    const violationResults = await requestsInParallel(
+      violationRequestsOptions,
+      'body.events',
+      10,
+      Logger
+    );
+
+    return flatten(violationResults);
+  } catch (err) {
+    throw err;
   }
-  return response;
 };
+
+const _getTimeframeParams = (monthsBack, dateTo) => ({
+  generationtime_from: m
+    .utc(dateTo)
+    .subtract(Math.floor(Math.abs(monthsBack)), 'months')
+    .subtract((Math.abs(monthsBack) % 1) * 30.41, 'days')
+    .format('MM/DD/YYYY HH:mm:ss'),
+  generationtime_to: m.utc(dateTo).format('MM/DD/YYYY HH:mm:ss')
+});
 
 module.exports = getViolationResponse;

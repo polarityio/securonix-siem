@@ -1,20 +1,22 @@
-const fs = require("fs");
-const request = require("request");
-const { promisify } = require("util");
+const fs = require('fs');
+const { map, get, identity, compact, includes, getOr } = require('lodash/fp');
+const { parallelLimit } = require('async');
+const request = require('postman-request');
 
-const config = require("../config/config");
-const getAuthToken = require("./getAuthToken");
+const getAuthToken = require('./getAuthToken');
 
 const SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES = [200];
+const RETRY_STATUS_CODES = [401, 403];
+const { MAX_AUTH_RETRIES } = require('./constants');
 
-const MAX_AUTH_RETRIES = 1;
-const _configFieldIsValid = (field) =>
-  typeof field === "string" && field.length > 0;
+const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
+const parseErrorToReadableJSON = (error) =>
+  JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
 
 const createRequestWithDefaults = (tokenCache, Logger) => {
   const {
     request: { ca, cert, key, passphrase, rejectUnauthorized, proxy }
-  } = config;
+  } = require('../config/config');
 
   const defaults = {
     ...(_configFieldIsValid(ca) && { ca: fs.readFileSync(ca) }),
@@ -23,18 +25,19 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     ...(_configFieldIsValid(passphrase) && { passphrase }),
     ...(_configFieldIsValid(proxy) && { proxy }),
     ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized }),
+    rejectUnauthorized: false
   };
 
-  const requestWithDefaults = (
-    preRequestFunction = () => ({}),
-    postRequestSuccessFunction = (x) => x,
-    postRequestFailureFunction = (e) => {
+  const requestWithDefaultsBuilder = (
+    preRequestFunction = async () => ({}),
+    postRequestSuccessFunction = async (x) => x,
+    postRequestFailureFunction = async (e) => {
       throw e;
     }
   ) => {
     const defaultsRequest = request.defaults(defaults);
 
-    const _requestWithDefault = (requestOptions) =>
+    const _requestWithDefaults = (requestOptions) =>
       new Promise((resolve, reject) => {
         defaultsRequest(requestOptions, (err, res, body) => {
           if (err) return reject(err);
@@ -43,76 +46,125 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       });
 
     return async ({ json: bodyWillBeJSON, ...requestOptions }) => {
-      const preRequestFunctionResults = await preRequestFunction(requestOptions);
+      const preRequestFunctionResults = await preRequestFunction(requestOptions); // calls handleAUth and returns token;
+
       const _requestOptions = {
         ...requestOptions,
         ...preRequestFunctionResults
       };
-      
+
       let postRequestFunctionResults;
       try {
-        const result = await _requestWithDefault(_requestOptions);
+        const result = await _requestWithDefaults(_requestOptions);
 
-        checkForStatusError(result, _requestOptions);
+        checkForStatusError(result, { ..._requestOptions, json: bodyWillBeJSON });
 
-        postRequestFunctionResults = await postRequestSuccessFunction({
-          ...result,
-          body: bodyWillBeJSON ? JSON.parse(result.body) : result.body
-        });
+        postRequestFunctionResults = await postRequestSuccessFunction(
+          result,
+          _requestOptions
+        );
+        const firstCharacterIsJSON = includes('{', get('body.0', result));
+
+        postRequestFunctionResults = await postRequestSuccessFunction(
+          {
+            ...result,
+            body:
+              firstCharacterIsJSON && bodyWillBeJSON
+                ? JSON.parse(result.body)
+                : result.body
+            // body: JSON.parse(result.body)
+          },
+          _requestOptions
+        );
       } catch (error) {
         postRequestFunctionResults = await postRequestFailureFunction(
           error,
           _requestOptions
         );
       }
-
       return postRequestFunctionResults;
     };
   };
 
+  const checkForStatusError = ({ statusCode, body }, requestOptions) => {
+    const requestOptionsWithoutSensitiveData = {
+      ...requestOptions
+      // options: '{...}',
+      // headers: {
+      //   ...requestOptions.headers,
+      //   Authorization: 'Bearer ****************'
+      // }
+    };
+
+    Logger.trace({ CHECK_FOR_STATUS: statusCode, body, requestOptions });
+
+    const roundedStatus = Math.round(statusCode / 100) * 100;
+    const statusCodeNotSuccessful = !SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(
+      roundedStatus
+    );
+
+    if (statusCodeNotSuccessful) {
+      const requestError = Error('Request Error');
+      requestError.status = statusCodeNotSuccessful ? statusCode : body.error;
+      requestError.description = JSON.stringify(body);
+      requestError.requestOptions = JSON.stringify(requestOptions);
+      throw requestError;
+    }
+  };
+
   const handleAuth = async (requestOptions) => {
-    const isAuthRequest = requestOptions.headers.validity;
+    const isAuthRequest = get('headers.validity', requestOptions);
+    const requestWithDefaults = requestWithDefaultsBuilder();
+
     if (!isAuthRequest) {
       const token = await getAuthToken(
-        requestOptions.headers,
-        requestDefaultsWithInterceptors,
-        tokenCache
+        get('headers', requestOptions),
+        requestWithDefaults,
+        tokenCache,
+        Logger
       ).catch((error) => {
-        Logger.error({ error }, "Unable to retrieve Auth Token");
         throw error;
       });
 
-      Logger.trace({ token }, "Token");
+      Logger.trace({ token }, 'Token');
 
       return {
         ...requestOptions,
         headers: {
-          ...requestOptions.headers,
-          token,
-        },
+          ...get('headers', requestOptions),
+          token
+        }
       };
     }
-
     return requestOptions;
   };
 
-  const handleAndReformatErrors = (err) => {
-    if (err.requestOptions) {
-      const retryCount =
-        (err.requestOptions && err.requestOptions.retryCount) || 0;
+  const handleAndReformatErrors = async (err) => {
+    const parsedErr = parseErrorToReadableJSON(err);
+
+    if (parsedErr.requestOptions) {
+      const parsedRequestOptions = JSON.parse(parsedErr.requestOptions);
+      const retryCount = getOr(0, 'retryCount', parsedRequestOptions);
 
       const needToRetryRequest =
-        err.status === 403 &&
-        err.requestOptions &&
-        retryCount <= MAX_AUTH_RETRIES;
+        RETRY_STATUS_CODES.includes(parsedErr.status) && retryCount < MAX_AUTH_RETRIES;
 
       if (needToRetryRequest) {
-        const { username, password } = err.requestOptions.headers;
+        const { username, password } = getOr({}, 'requestOptions.headers', parsedErr);
+
         const authCacheKey = `${username}${password}`;
         tokenCache.del(authCacheKey);
 
-        return requestDefaultsWithInterceptors({
-          ...err.requestOptions,
+        const requestWithDefaults = requestWithDefaultsBuilder(
+          handleAuth,
+          identity,
+          handleAndReformatErrors
+        );
+
+        parsedRequestOptions.token = undefined;
+
+        return await requestWithDefaults({
+          ...parsedRequestOptions,
           retryCount: retryCount + 1
         });
       } else {
@@ -123,36 +175,34 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     }
   };
 
-  const checkForStatusError = ({ statusCode, body }, requestOptions) => {
-    Logger.trace({
-      requestOptions: {
-        ...requestOptions,
-        headers: {
-          ...requestOptions.headers,
-          token: '************',
-        },
-        options: '************'
-      },
-      statusCode,
-      body
-    });
+  const requestDefaultsWithInterceptors = requestWithDefaultsBuilder(
+    handleAuth,
+    identity,
+    handleAndReformatErrors
+  );
 
-    const roundedStatus = Math.round(statusCode / 100) * 100;
-    if (!SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(roundedStatus)) {
-      const requestError = Error('Request Error');
-      requestError.status = statusCode;
-      requestError.description = JSON.stringify(body);
-      requestError.requestOptions = JSON.stringify(requestOptions);
-      throw requestError;
+  const requestsInParallel = async (
+    requestsOptions,
+    responseGetPath = 'body',
+    limit = 10,
+    Logger
+  ) => {
+    try {
+      const unexecutedRequestFunctions = map(
+        (requestOptions) => async () =>
+          get(responseGetPath, await requestDefaultsWithInterceptors(requestOptions)),
+        requestsOptions
+      );
+
+      return compact(await parallelLimit(unexecutedRequestFunctions, limit));
+    } catch (error) {
+      const err = parseErrorToReadableJSON(error);
+      Logger.trace({ err }, 'error in requestsInParallel');
+      throw err;
     }
   };
 
-  const requestDefaultsWithInterceptors = requestWithDefaults(
-    handleAuth,
-    (r) => r,
-    handleAndReformatErrors
-  );
-  return requestDefaultsWithInterceptors;
+  return { requestWithDefaults: requestDefaultsWithInterceptors, requestsInParallel };
 };
 
 module.exports = createRequestWithDefaults;

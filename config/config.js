@@ -1,8 +1,7 @@
 module.exports = {
   name: 'Securonix',
   acronym: 'SX',
-  description:
-    'Search Securonix for user Violation and Incident information',
+  description: 'Search Securonix for User Violation and Incident information on Emails, Domains, and IPs',
   entityTypes: [
     'ipv4',
     'email',
@@ -19,7 +18,7 @@ module.exports = {
     //   key: 'hostname',
     //   // Replace this regex with a regex for your own hostnames
     //   regex: /\w{3,}\-\w{3,}/
-    // }
+    // },
   ],
   styles: ['./styles/styles.less'],
   defaultColor: 'light-blue',
@@ -30,14 +29,6 @@ module.exports = {
     },
     template: {
       file: './templates/block.hbs'
-    }
-  },
-  summary: {
-    component: {
-      file: './components/summary.js'
-    },
-    template: {
-      file: './templates/summary.hbs'
     }
   },
   request: {
@@ -77,26 +68,6 @@ module.exports = {
       description: 'Password for the provided Securonix username',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'searchForEmployeeId',
-      name: 'Search For Employee ID',
-      description:
-        'If enabled, the integration will search Securonix for Employee IDs in the specified Channel.  This option should be used in conjunction with a Channel Entity Filter on the "Annotated Entities" entity type.',
-      default: true,
-      type: 'boolean',
-      userCanEdit: true,
-      adminOnly: false
-    },
-    {
-      key: 'searchIncidents',
-      name: 'Search Incidents',
-      description:
-        'If enabled, allows you to search Securonix for Incidents related to searched entities.',
-      default: true,
-      type: 'boolean',
       userCanEdit: true,
       adminOnly: false
     },
