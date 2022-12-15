@@ -168,190 +168,194 @@
       Securonix
       {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
   </div>
-  <div class='mb-1'>
-    {{#each details.violation as |violation index|}}
+  <div>
+    {{#each pagedViolations as |violation index|}}
       {{#if (gt index 0)}}
         <hr />
       {{/if}}
+      <div class="violation-container">
+        <h1 class='p-title'>
+          {{fa-icon icon='do-not-enter' fixedWidth=true}}
+            #{{index}} -
+          {{violation.riskthreatname}}
+        </h1>
+        {{#if violation.policyname}}
+          <div>
+            <span class='p-key'>Policy:</span>
+            <span class='p-value p-block'>{{violation.policyname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.category}}
+          <div>
+            <span class='p-key'>Category:</span>
+            <span class='p-value'>{{titleize
+                (humanize (dasherize violation.category))
+              }}</span>
+          </div>
+        {{/if}}
+        {{#if violation.eventoutcome}}
+          <div>
+            <span class='p-key'>Outcome:</span>
+            <span class='p-value p-block'>{{violation.eventoutcome}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.associatedUser.fullname}}
+          <div>
+            <span class='p-key'>Associated User:</span>
+            <span class='p-value'>{{violation.associatedUser.fullname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.u_workemail}}
+          <div>
+            <span class='p-key'>Associated User Email:</span>
+            <span class='p-value'>{{violation.u_workemail}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.accountname}}
+          <div>
+            <span class='p-key'>Account Name:</span>
+            <span class='p-value'>{{violation.accountname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.sourceusername}}
+          <div>
+            <span class='p-key'>Source UserName:</span>
+            <span class='p-value'>{{violation.sourceusername}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.tenantname}}
+          <div>
+            <span class='p-key'>Tenant Name:</span>
+            <span class='p-value'>{{violation.tenantname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.emailsenderdomain}}
+          <div>
+            <span class='p-key'>Email Sender Domain:</span>
+            <span class='p-value'>{{violation.emailsenderdomain}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.resourcename}}
+          <div>
+            <span class='p-key'>Resource Name:</span>
+            <span class='p-value'>{{violation.resourcename}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.deviceaction}}
+          <div>
+            <span class='p-key'>Device Action:</span>
+            <span class='p-value'>{{violation.deviceaction}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.filename}}
+          <div>
+            <span class='p-key'>File Name:</span>
+            <span class='p-value'>{{violation.filename}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.ipaddress}}
+          <div>
+            <span class='p-key'>IP Address:</span>
+            <span class='p-value'>{{violation.ipaddress}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.oldfilepath}}
+          <div>
+            <span class='p-key'>Filepath:</span>
+            <span class='p-value'>{{violation.oldfilepath}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.requesturl}}
+          <div>
+            <span class='p-key'>Request URL:</span>
+            <span class='p-value'>{{violation.requesturl}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.eventcountry}}
+          <div>
+            <span class='p-key'>Country:</span>
+            <span class='p-value'>{{violation.eventcountry}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.eventcity}}
+          <div>
+            <span class='p-key'>City:</span>
+            <span class='p-value'>{{violation.eventcity}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.rg_name}}
+          <div>
+            <span class='p-key'>RG Name:</span>
+            <span class='p-value'>{{violation.rg_name}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.datetime.length}}
+          {{#if (get expandableTitleStates.datetime index)}}
+            <a
+              href='#'
+              class='expandable-title'
+              {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            >
+              <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
+              {{fa-icon icon='angle-up'}}
+            </a>
+            <div class='wrap-container scrollable-container'>
+              {{#each violation.datetime as |time|}}
+                <span class='time-container'>{{moment-format
+                    time
+                    'ddd, DD MMM YYYY HH:mm:ss'
+                    timeZone=timezone
+                  }}</span>
+              {{/each}}
+            </div>
+          {{else}}
+            <a
+              href='#'
+              class='expandable-title'
+              {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            >
+              <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
+              {{fa-icon icon='angle-down'}}
+            </a>
+          {{/if}}
+        {{/if}}
 
-      <h1 class='p-title'>
-        {{fa-icon icon='do-not-enter' fixedWidth=true}}
-        {{violation.riskthreatname}}
-      </h1>
-      {{#if violation.policyname}}
-        <div>
-          <span class='p-key'>Policy:</span>
-          <span class='p-value p-block'>{{violation.policyname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.category}}
-        <div>
-          <span class='p-key'>Category:</span>
-          <span class='p-value'>{{titleize
-              (humanize (dasherize violation.category))
-            }}</span>
-        </div>
-      {{/if}}
-      {{#if violation.eventoutcome}}
-        <div>
-          <span class='p-key'>Outcome:</span>
-          <span class='p-value'>{{violation.eventoutcome}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.associatedUser.fullname}}
-        <div>
-          <span class='p-key'>Associated User:</span>
-          <span class='p-value'>{{violation.associatedUser.fullname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.u_workemail}}
-        <div>
-          <span class='p-key'>Associated User Email:</span>
-          <span class='p-value'>{{violation.u_workemail}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.accountname}}
-        <div>
-          <span class='p-key'>Account Name:</span>
-          <span class='p-value'>{{violation.accountname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.sourceusername}}
-        <div>
-          <span class='p-key'>Source UserName:</span>
-          <span class='p-value'>{{violation.sourceusername}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.tenantname}}
-        <div>
-          <span class='p-key'>Tenant Name:</span>
-          <span class='p-value'>{{violation.tenantname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.emailsenderdomain}}
-        <div>
-          <span class='p-key'>Email Sender Domain:</span>
-          <span class='p-value'>{{violation.emailsenderdomain}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.resourcename}}
-        <div>
-          <span class='p-key'>Resource Name:</span>
-          <span class='p-value'>{{violation.resourcename}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.deviceaction}}
-        <div>
-          <span class='p-key'>Device Action:</span>
-          <span class='p-value'>{{violation.deviceaction}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.filename}}
-        <div>
-          <span class='p-key'>File Name:</span>
-          <span class='p-value'>{{violation.filename}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.ipaddress}}
-        <div>
-          <span class='p-key'>IP Address:</span>
-          <span class='p-value'>{{violation.ipaddress}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.oldfilepath}}
-        <div>
-          <span class='p-key'>Filepath:</span>
-          <span class='p-value'>{{violation.oldfilepath}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.requesturl}}
-        <div>
-          <span class='p-key'>Request URL:</span>
-          <span class='p-value'>{{violation.requesturl}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.eventcountry}}
-        <div>
-          <span class='p-key'>Country:</span>
-          <span class='p-value'>{{violation.eventcountry}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.eventcity}}
-        <div>
-          <span class='p-key'>City:</span>
-          <span class='p-value'>{{violation.eventcity}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.rg_name}}
-        <div>
-          <span class='p-key'>RG Name:</span>
-          <span class='p-value'>{{violation.rg_name}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.datetime.length}}
-        {{#if (get expandableTitleStates.datetime index)}}
+        {{#if (get expandableTitleStates.allFields index)}}
           <a
             href='#'
             class='expandable-title'
-            {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
           >
-            <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
+            <span class='text'>Example Log</span>
             {{fa-icon icon='angle-up'}}
           </a>
-          <div class='wrap-container scrollable-container'>
-            {{#each violation.datetime as |time|}}
-              <span class='time-container'>{{moment-format
-                  time
-                  'ddd, DD MMM YYYY HH:mm:ss'
-                  timeZone=timezone
-                }}</span>
-            {{/each}}
-          </div>
+          <pre class="scrollable-container">{{#each-in violation.allFields as |key value|}}<span
+                class='p-value'
+              >{{key}}&nbsp;=&nbsp;</span><span class='p-key'>{{value}},<br
+                /></span>{{/each-in}}</pre>
         {{else}}
           <a
             href='#'
             class='expandable-title'
-            {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
           >
-            <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
+            <span class='text'>Example Log</span>
             {{fa-icon icon='angle-down'}}
           </a>
         {{/if}}
-      {{/if}}
-
-      {{#if (get expandableTitleStates.allFields index)}}
-        <a
-          href='#'
-          class='expandable-title'
-          {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
-        >
-          <span class='text'>Example Log</span>
-          {{fa-icon icon='angle-up'}}
-        </a>
-        <pre class="scrollable-container">{{#each-in violation.allFields as |key value|}}<span
-              class='p-value'
-            >{{key}}&nbsp;=&nbsp;</span><span class='p-key'>{{value}},<br
-              /></span>{{/each-in}}</pre>
-      {{else}}
-        <a
-          href='#'
-          class='expandable-title'
-          {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
-        >
-          <span class='text'>Example Log</span>
-          {{fa-icon icon='angle-down'}}
-        </a>
-      {{/if}}
-    {{/each}}
-    {{#if (gte details.violations.length details.violationsMaxResultCount)}}
-      <hr />
-      <div class='view-in-ts end'>
-        <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>
-          ...Find all in Securonix
-          {{fa-icon icon='external-link-square' class='external-link-icon'}}
-        </a>
       </div>
-    {{/if}}
+    {{/each}}
+    <div class="paging-container mt-2 d-flex align-items-center justify-content-between">
+      <div>
+        <span class="next-hit-stats">Violations {{block._state.violation.startItem}} to {{block._state.violation.endItem}} of {{details.violation.length}}</span>
+      </div>
+      <div>
+        <span title="First Page" {{action "changePage" "firstPage"}} class="next-hit-button p-action">{{fa-icon icon="chevron-double-left" fixedWidth=true}}</span>
+        <span title="Previous Page" {{action "changePage" -1}} class="next-hit-button p-action">{{fa-icon icon="chevron-left" fixedWidth=true}}</span>
+        <span title="Next Page" {{action "changePage" 1}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-right" fixedWidth=true}}</span>
+        <span title="Last Page" {{action "changePage" "lastPage"}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-double-right" fixedWidth=true}}</span>
+      </div>
+    </div>
   </div>
 {{/if}}
 
