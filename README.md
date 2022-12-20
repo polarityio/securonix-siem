@@ -26,13 +26,6 @@ Your Securonix username
 
 Password for the provided Securonix username
 
-### Search For Employee ID
-
-If enabled, the integration will search Securonix for Employee IDs in the channels specified by the Channel Entity Filter.  This option should be used in conjunction with a Channel Entity Filter on the "Annotated Entities" entity type.  
-
-If you do not see the "Annotated Entities" type under the Manage Integration Data option you will need to uncomment the "string" entityType in the integration's `config.js` file on the server.  After uncommenting this entity type, you will need to
-increment the version within the integration's `package.json` file and then restart your Polarity Server. 
-
 ### Search Incidents
 
 If enabled, allows you to search Securonix for Incidents related to searched entities.
