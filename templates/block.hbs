@@ -1,234 +1,370 @@
 <ul class='nav nav-tabs'>
-  {{#if details.violations.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'violations'}}
-        class='nav-link {{if (or (eq activeTab 'violations') (not activeTab)) 'active'}}'
-        href='#'
-      >
-        Violations
-      </a>
-    </li>
-  {{/if}}
-  {{#if details.associatedUsers.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'associatedUsers'}}
-        class='nav-link {{if (eq activeTab 'associatedUsers') 'active'}}'
-        href='#'
-      >
-        Users
-      </a>
-    </li>
-  {{/if}}
-  {{#if details.incidents.length}}
-    <li class='nav-item'>
-      <a
-        {{action 'changeTab' 'incidents'}}
-        class='nav-link {{if (eq activeTab 'incidents') 'active'}}'
-        href='#'
-      >
-        Incidents
-      </a>
-    </li>
-  {{/if}}
+  {{#each tabNames as |tabName|}}
+    {{#if (get details tabName 'length')}}
+      <li class='nav-item'>
+        <a
+          {{action 'changeTab' tabName}}
+          class='nav-link {{if (eq block._state.activeTab tabName) "active"}}'
+          href='#'
+        >
+          {{titleize (humanize (dasherize tabName))}}
+        </a>
+      </li>
+    {{/if}}
+  {{/each}}
 </ul>
 
-{{#if (eq activeTab 'violations')}}
-  <div class='view-in-ts'>
-    <a class='p-link' href={{details.spotterUrl}}>View in Securonix
-      {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
-  </div>
+{{#if (eq block._state.activeTab 'riskscore')}}
+  {{#if details.riskscore}}
+    <div class='mb-1'>
+      <div class='view-in-ts'>
+        <a
+          class='p-link'
+          href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'
+        >View in Securonix
+          {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
+      </div>
+      {{#each details.riskscore as |riskscore|}}
+        <h1 class='p-title'>
+          {{fa-icon icon='arrow-right' fixedWidth=true}}
+          Risk Score
+          {{riskscore.riskscore}}
+        </h1>
+        {{#if riskscore.riskthreatname}}
+          <div>
+            <span class='p-key'>Riskscore:</span>
+            <span class='p-value'>{{riskscore.riskthreatname}}</span>
+          </div>
+        {{/if}}
+        {{#if riskscore.policyname}}
+          <div>
+            <span class='p-key'>Policy Name:</span>
+            <span class='p-value'>{{riskscore.policyname}}</span>
+          </div>
+        {{/if}}
+        {{#if riskscore.violator}}
+          <div>
+            <span class='p-key'>Violator:</span>
+            <span class='p-value'>{{riskscore.violator}}</span>
+          </div>
+        {{/if}}
+        {{#if riskscore.lastgeneratetime}}
+          <div>
+            <span class='p-key'>Last Generation Time:</span>
+            <span class='p-value'>{{riskscore.lastgeneratetime}}</span>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
+{{/if}}
+
+{{#if (eq block._state.activeTab 'tpi')}}
+  {{#if details.tpi}}
+    <div class='mb-1'>
+      <div class='view-in-ts'>
+        <a
+          class='p-link'
+          href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'
+        >View in Securonix
+          {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
+      </div>
+      {{#each details.tpi as |tpi|}}
+        <h1 class='p-title'>
+          {{fa-icon icon='info' fixedWidth=true}}
+          {{tpi.tpi_ip}}
+        </h1>
+        {{#if tpi.tpi_criticality}}
+          <div>
+            <span class='p-key'>TPI Criticality:</span>
+            <span class='p-value'>{{tpi.tpi_criticality}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_risk}}
+          <div>
+            <span class='p-key'>TPI Risk:</span>
+            <span class='p-value'>{{tpi.tpi_risk}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_malware}}
+          <div>
+            <span class='p-key'>TPI Malware:</span>
+            <span class='p-value'>{{tpi.tpi_malware}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_type}}
+          <div>
+            <span class='p-key'>TPI Type:</span>
+            <span class='p-value'>{{tpi.tpi_type}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_src}}
+          <div>
+            <span class='p-key'>TPI Source:</span>
+            <span class='p-value'>{{tpi.tpi_src}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tpi_src_organization}}
+          <div>
+            <span class='p-key'>TPI Source Org:</span>
+            <span class='p-value'>{{tpi.tpi_src_organization}}</span>
+          </div>
+        {{/if}}
+        {{#if tpi.tenantname}}
+          <div>
+            <span class='p-key'>Tenant Name:</span>
+            <span class='p-value'>{{tpi.tenantname}}</span>
+          </div>
+        {{/if}}
+      {{/each}}
+    </div>
+  {{/if}}
+{{/if}}
+
+{{#if (eq block._state.activeTab 'users')}}
   <div class='mb-1'>
-    {{#each details.violations as |violation index|}}
+    {{#each details.users as |user|}}
+      <h1 class='p-title'>
+        {{fa-icon icon='user' fixedWidth=true}}
+        {{user.workemail}}
+      </h1>
+      {{#if user.firstname}}
+        <div>
+          <span class='p-key'>First Name:</span>
+          <span class='p-value'>{{user.firstname}}</span>
+        </div>
+      {{/if}}
+      {{#if user.lastname}}
+        <div>
+          <span class='p-key'>Last Name:</span>
+          <span class='p-value'>{{user.lastname}}</span>
+        </div>
+      {{/if}}
+      {{#if user.userriskscore}}
+        <div>
+          <span class='p-key'>Risk Score:</span>
+          <span class='p-value'>{{user.userriskscore}}</span>
+        </div>
+      {{/if}}
+      {{#if user.status}}
+        <div>
+          <span class='p-key'>Status:</span>
+          <span class='p-value'>{{user.status}}</span>
+        </div>
+      {{/if}}
+      {{#if user.usercriticality}}
+        <div>
+          <span class='p-key'>Criticality:</span>
+          <span class='p-value'>{{user.usercriticality}}</span>
+        </div>
+      {{/if}}
+    {{/each}}
+  </div>
+{{/if}}
+
+{{#if (eq block._state.activeTab 'violation')}}
+  <div class='view-in-ts'>
+    <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
+      Securonix
+      {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
+  </div>
+  <div>
+    {{#each pagedViolations as |violation index|}}
       {{#if (gt index 0)}}
         <hr />
       {{/if}}
+      <div class="violation-container">
+        <h1 class='p-title'>
+          {{fa-icon icon='do-not-enter' fixedWidth=true}}
+            #{{violation.index}} -
+          {{violation.riskthreatname}}
+        </h1>
+        {{#if violation.policyname}}
+          <div>
+            <span class='p-key'>Policy:</span>
+            <span class='p-value p-block'>{{violation.policyname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.category}}
+          <div>
+            <span class='p-key'>Category:</span>
+            <span class='p-value'>{{titleize
+                (humanize (dasherize violation.category))
+              }}</span>
+          </div>
+        {{/if}}
+        {{#if violation.eventoutcome}}
+          <div>
+            <span class='p-key'>Outcome:</span>
+            <span class='p-value p-block'>{{violation.eventoutcome}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.associatedUser.fullname}}
+          <div>
+            <span class='p-key'>Associated User:</span>
+            <span class='p-value'>{{violation.associatedUser.fullname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.u_workemail}}
+          <div>
+            <span class='p-key'>Associated User Email:</span>
+            <span class='p-value'>{{violation.u_workemail}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.accountname}}
+          <div>
+            <span class='p-key'>Account Name:</span>
+            <span class='p-value'>{{violation.accountname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.sourceusername}}
+          <div>
+            <span class='p-key'>Source UserName:</span>
+            <span class='p-value'>{{violation.sourceusername}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.tenantname}}
+          <div>
+            <span class='p-key'>Tenant Name:</span>
+            <span class='p-value'>{{violation.tenantname}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.emailsenderdomain}}
+          <div>
+            <span class='p-key'>Email Sender Domain:</span>
+            <span class='p-value'>{{violation.emailsenderdomain}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.resourcename}}
+          <div>
+            <span class='p-key'>Resource Name:</span>
+            <span class='p-value'>{{violation.resourcename}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.deviceaction}}
+          <div>
+            <span class='p-key'>Device Action:</span>
+            <span class='p-value'>{{violation.deviceaction}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.filename}}
+          <div>
+            <span class='p-key'>File Name:</span>
+            <span class='p-value'>{{violation.filename}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.ipaddress}}
+          <div>
+            <span class='p-key'>IP Address:</span>
+            <span class='p-value'>{{violation.ipaddress}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.oldfilepath}}
+          <div>
+            <span class='p-key'>Filepath:</span>
+            <span class='p-value'>{{violation.oldfilepath}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.requesturl}}
+          <div>
+            <span class='p-key'>Request URL:</span>
+            <span class='p-value'>{{violation.requesturl}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.eventcountry}}
+          <div>
+            <span class='p-key'>Country:</span>
+            <span class='p-value'>{{violation.eventcountry}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.eventcity}}
+          <div>
+            <span class='p-key'>City:</span>
+            <span class='p-value'>{{violation.eventcity}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.rg_name}}
+          <div>
+            <span class='p-key'>RG Name:</span>
+            <span class='p-value'>{{violation.rg_name}}</span>
+          </div>
+        {{/if}}
+        {{#if violation.datetime.length}}
+          {{#if (get expandableTitleStates.datetime index)}}
+            <a
+              href='#'
+              class='expandable-title'
+              {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            >
+              <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
+              {{fa-icon icon='angle-up'}}
+            </a>
+            <div class='wrap-container scrollable-container'>
+              {{#each violation.datetime as |time|}}
+                <span class='time-container'>{{moment-format
+                    time
+                    'ddd, DD MMM YYYY HH:mm:ss'
+                    timeZone=timezone
+                  }}</span>
+              {{/each}}
+            </div>
+          {{else}}
+            <a
+              href='#'
+              class='expandable-title'
+              {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            >
+              <span class='text'>Times Violation Occurred ({{violation.datetime.length}}):</span>
+              {{fa-icon icon='angle-down'}}
+            </a>
+          {{/if}}
+        {{/if}}
 
-      <h1 class='p-title'>
-        {{fa-icon 'do-not-enter' fixedWidth=true}}
-        {{violation.riskthreatname}}
-      </h1>
-      {{#if violation.policyname}}
-        <div>
-          <span class='p-key'>Policy:</span>
-          <span class='p-value'>{{violation.policyname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.category}}
-        <div>
-          <span class='p-key'>Category:</span>
-          <span class='p-value'>{{titleize
-              (humanize (dasherize violation.category))
-            }}</span>
-        </div>
-      {{/if}}
-      {{#if violation.eventoutcome}}
-        <div>
-          <span class='p-key'>Outcome:</span>
-          <span class='p-value'>{{violation.eventoutcome}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.associatedUser.fullname}}
-        <div>
-          <span class='p-key'>Associated User:</span>
-          <span class='p-value'>{{violation.associatedUser.fullname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.u_workemail}}
-        <div>
-          <span class='p-key'>Associated User Email:</span>
-          <span class='p-value'>{{violation.u_workemail}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.accountname}}
-        <div>
-          <span class='p-key'>Account Name:</span>
-          <span class='p-value'>{{violation.accountname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.sourceusername}}
-        <div>
-          <span class='p-key'>Source UserName:</span>
-          <span class='p-value'>{{violation.sourceusername}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.tenantname}}
-        <div>
-          <span class='p-key'>Tenant Name:</span>
-          <span class='p-value'>{{violation.tenantname}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.emailsenderdomain}}
-        <div>
-          <span class='p-key'>Email Sender Domain:</span>
-          <span class='p-value'>{{violation.emailsenderdomain}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.resourcename}}
-        <div>
-          <span class='p-key'>Resource Name:</span>
-          <span class='p-value'>{{violation.resourcename}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.deviceaction}}
-        <div>
-          <span class='p-key'>Device Action:</span>
-          <span class='p-value'>{{violation.deviceaction}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.filename}}
-        <div>
-          <span class='p-key'>File Name:</span>
-          <span class='p-value'>{{violation.filename}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.ipaddress}}
-        <div>
-          <span class='p-key'>IP Address:</span>
-          <span class='p-value'>{{violation.ipaddress}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.oldfilepath}}
-        <div>
-          <span class='p-key'>Filepath:</span>
-          <span class='p-value'>{{violation.oldfilepath}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.requesturl}}
-        <div>
-          <span class='p-key'>Request URL:</span>
-          <span class='p-value'>{{violation.requesturl}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.eventcountry}}
-        <div>
-          <span class='p-key'>Country:</span>
-          <span class='p-value'>{{violation.eventcountry}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.eventcity}}
-        <div>
-          <span class='p-key'>City:</span>
-          <span class='p-value'>{{violation.eventcity}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.rg_name}}
-        <div>
-          <span class='p-key'>RG Name:</span>
-          <span class='p-value'>{{violation.rg_name}}</span>
-        </div>
-      {{/if}}
-      {{#if violation.datetime.length}}
-        {{#if (get expandableTitleStates.datetime index)}}
+        {{#if (get expandableTitleStates.allFields index)}}
           <a
             href='#'
             class='expandable-title'
-            {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
           >
-            <span class='text'>Times Violation Occurred ({{violation.violationCount}}):</span>
-            {{fa-icon 'angle-up'}}
+            <span class='text'>Example Log</span>
+            {{fa-icon icon='angle-up'}}
           </a>
-          <div class='wrap-container'>
-            {{#each violation.datetime as |time|}}
-              <span class='time-container'>{{moment-format
-                  time
-                  'ddd, DD MMM YYYY HH:mm:ss'
-                  timeZone=timezone
-                }}</span>
-            {{/each}}
-          </div>
+          <pre class="scrollable-container">{{#each-in violation.allFields as |key value|}}<span
+                class='p-value'
+              >{{key}}&nbsp;=&nbsp;</span><span class='p-key'>{{value}},<br
+                /></span>{{/each-in}}</pre>
         {{else}}
           <a
             href='#'
             class='expandable-title'
-            {{on 'click' (action 'toggleExpandableTitle' index 'datetime')}}
+            {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
           >
-            <span class='text'>Times Violation Occurred ({{violation.violationCount}}):</span>
-            {{fa-icon 'angle-down'}}
+            <span class='text'>Example Log</span>
+            {{fa-icon icon='angle-down'}}
           </a>
         {{/if}}
-      {{/if}}
-      {{#if (get expandableTitleStates.allFields index)}}
-        <a
-          href='#'
-          class='expandable-title'
-          {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
-        >
-          <span class='text'>Example Log</span>
-          {{fa-icon 'angle-up'}}
-        </a>
-        <pre>{{#each-in violation.allFields as |key value|}}<span
-              class='p-value'
-            >{{key}}&nbsp;=&nbsp;</span><span class='p-key'>{{value}},<br
-              /></span>{{/each-in}}</pre>
-      {{else}}
-        <a
-          href='#'
-          class='expandable-title'
-          {{on 'click' (action 'toggleExpandableTitle' index 'allFields')}}
-        >
-          <span class='text'>Example Log</span>
-          {{fa-icon 'angle-down'}}
-        </a>
-      {{/if}}
-    {{/each}}
-    {{#if (gte details.violations.length details.MAX_VIOLATION_RESULTS)}}
-      <hr />
-      <div class='view-in-ts end'>
-        <a class='p-link' href={{details.spotterUrl}}>
-          ...Find all in Securonix
-          {{fa-icon 'external-link-square' class='external-link-icon'}}
-        </a>
       </div>
-    {{/if}}
+    {{/each}}
+    <div class="paging-container mt-2 d-flex align-items-center justify-content-between">
+      <div>
+        <span class="next-hit-stats">Violations {{block._state.violation.startItem}} to {{block._state.violation.endItem}} of {{details.violation.length}}</span>
+      </div>
+      <div>
+        <span title="First Page" {{action "changePage" "firstPage"}} class="next-hit-button p-action">{{fa-icon icon="chevron-double-left" fixedWidth=true}}</span>
+        <span title="Previous Page" {{action "changePage" -1}} class="next-hit-button p-action">{{fa-icon icon="chevron-left" fixedWidth=true}}</span>
+        <span title="Next Page" {{action "changePage" 1}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-right" fixedWidth=true}}</span>
+        <span title="Last Page" {{action "changePage" "lastPage"}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-double-right" fixedWidth=true}}</span>
+      </div>
+    </div>
   </div>
 {{/if}}
 
-{{#if (eq activeTab 'associatedUsers')}}
+
+{{#if (eq block._state.activeTab 'associatedUsers')}}
   <div class='view-in-ts'>
-    <a class='p-link' href={{details.spotterUrl}}>View in Securonix
-      {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
+    <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
+      Securonix
+      {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
   </div>
   <div class='mb-1'>
     {{#each details.associatedUsers as |associatedUser index|}}
@@ -237,7 +373,7 @@
       {{/if}}
       <div>
         <h1 class='p-title'>
-          {{fa-icon 'user' fixedWidth=true}}
+          {{fa-icon icon='user' fixedWidth=true}}
           {{#if associatedUser.fullname}}
             {{associatedUser.fullname}}
           {{else}}
@@ -368,136 +504,5 @@
         {{/if}}
       </div>
     {{/each}}
-  </div>
-{{/if}}
-
-{{#if (eq activeTab 'incidents')}}
-  <div class='view-in-ts'>
-    <a class='p-link' href={{details.incidentUrl}}>View in Securonix
-      {{fa-icon 'external-link-square' class='external-link-icon'}}</a>
-  </div>
-  <div class='mb-1'>
-    {{#each details.incidents as |incident index|}}
-      {{#if (gt index 0)}}
-        <hr />
-      {{/if}}
-
-      <h1 class='p-title'>
-        {{fa-icon 'info-circle' fixedWidth=true}}
-        {{incident.violatorId}}
-      </h1>
-      {{#if incident.url}}
-        <a class='p-link' href={{incident.url}}>
-          View Incident
-          {{fa-icon 'external-link-square' class='external-link-icon'}}
-        </a>
-      {{/if}}
-      {{#if incident.violatorText}}
-        <div>
-          <span class='p-key'>Violator Text:</span>
-          <span class='p-value'>{{incident.violatorText}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.incidentType}}
-        <div>
-          <span class='p-key'>Incident Type:</span>
-          <span class='p-value'>{{incident.incidentType}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.incidentStatus}}
-        <div>
-          <span class='p-key'>Incident Status:</span>
-          <span class='p-value'>{{incident.incidentStatus}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.riskscore}}
-        <div>
-          <span class='p-key'>Risk Score:</span>
-          <span class='p-value'>{{incident.riskscore}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.priority}}
-        <div>
-          <span class='p-key'>Priority:</span>
-          <span class='p-value'>{{capitalize incident.priority}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.entity}}
-        <div>
-          <span class='p-key'>Entity:</span>
-          <span class='p-value'>{{incident.entity}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.workflowName}}
-        <div>
-          <span class='p-key'>Workflow Name:</span>
-          <span class='p-value'>{{incident.workflowName}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.isWhitelisted}}
-        <div>
-          <span class='p-key'>Is Whitelisted:</span>
-          <span class='p-value'>{{incident.isWhitelisted}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.watchlisted}}
-        <div>
-          <span class='p-key'>Is Watchlisted:</span>
-          <span class='p-value'>{{incident.watchlisted}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.assignedUser}}
-        <div>
-          <span class='p-key'>Assigned User:</span>
-          <span class='p-value'>{{incident.assignedUser}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.tenantInfo.tenantname}}
-        <div>
-          <span class='p-key'>Tenant Name:</span>
-          <span class='p-value'>{{incident.tenantInfo.tenantname}}</span>
-        </div>
-      {{/if}}
-      {{#if incident.casecreatetime}}
-        <div>
-          <span class='p-key'>Case Created At:</span>
-          <span class='p-value'>{{moment-format
-              incident.casecreatetime
-              'ddd, DD MMM YYYY HH:mm:ss'
-              timeZone=timezone
-            }}</span>
-        </div>
-      {{/if}}
-      {{#if incident.lastUpdateDate}}
-        <div>
-          <span class='p-key'>Last Updated:</span>
-          <span class='p-value'>{{moment-format
-              incident.lastUpdateDate
-              'ddd, DD MMM YYYY HH:mm:ss'
-              timeZone=timezone
-            }}</span>
-        </div>
-      {{/if}}
-
-      {{#if incident.reason}}
-        <div>
-          <span class='p-key'>Incident Reasons:</span>
-          <div class='wrap-container'>
-            {{#each incident.reason as |reason|}}
-              <span class='time-container'>{{reason}}</span>
-            {{/each}}
-          </div>
-        </div>
-      {{/if}}
-    {{/each}}
-    {{#if (gte details.incidents.length details.MAX_INCIDENTS_RESULTS)}}
-      <hr />
-      <div class='view-in-ts end'>
-        <a class='p-link' href={{details.incidentUrl}}>
-          ...Find all in Securonix
-          {{fa-icon 'external-link-square' class='external-link-icon'}}
-        </a>
-      </div>
-    {{/if}}
   </div>
 {{/if}}

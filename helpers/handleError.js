@@ -7,7 +7,7 @@ const STATUS_CODE_ERROR_MESSAGE = {
   }),
   403: (error) => ({
     err: "Token Expired",
-    detail: "The Token has Expired.  Retry your request to reauthorize."
+    detail: "Securonix token refresh failed. Contact your Securonix Admin."
   }),
   404: (error) => ({
     err: "Not Found",

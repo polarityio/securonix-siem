@@ -1,6 +1,8 @@
 const POSSIBLE_TIME_KEYS = ['eventtime', 'datetime'];
 const POSSIBLE_USER_KEYS = ['u_workemail', 'sourceusername', 'accountname', 'tenantname'];
 
+const MAX_AUTH_RETRIES = 15;
+
 const ASSOCIATED_USER_KEYS = [
   ...POSSIBLE_USER_KEYS,
   'u_fullname',
@@ -75,19 +77,35 @@ const VIOLATION_KEYS = {
 };
 
 const QUERY_KEYS = {
-  ip: ['ipaddress'],
-  email: ['workemail'],
-  domain: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl'],
-  string: ['employeeid', 'accountname', 'lanid', 'sourceusername'],
-  username: [
-    'employeeid',
-    'accountname',
-    'lanid',
-    'sourceusername',
-    'accountname',
-    'tenantname'
-  ],
-  hostname: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl']
+  violation: {
+    ip: ['ipaddress'],
+    email: ['workemail'],
+    domain: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl'],
+    string: ['employeeid', 'accountname', 'lanid', 'sourceusername'],
+    username: [
+      'employeeid',
+      'accountname',
+      'lanid',
+      'sourceusername',
+      'accountname',
+      'tenantname'
+    ],
+    hostname: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl']
+  },
+  users: {
+    email: ['workemail']
+  },
+  tpi: {
+    ip: ['tpi_ip', 'tpi_domain']
+  },
+  riskscore: {
+    email: ['workemail'],
+    ip: ['entityid']
+  },
+  asset: {
+    // hostname: [],
+    ip: ['key_ip']
+  }
 };
 
 const INCIDENT_QUERY_PATHS = [
@@ -97,10 +115,20 @@ const INCIDENT_QUERY_PATHS = [
   'tenantInfo.tenantname'
 ];
 
-const TIME_FOR_TOKEN_DAYS = 365;
+const QUERY_SORT_KEYS = {
+  violations: {
+    direction: 'desc',
+    sortKey: 'violationCount',
+    maxResultCount: 40
+  },
+  users: {
+    direction: 'desc',
+    sortKey: 'violationCount',
+    maxResultCount: 40
+  }
+};
 
-const MAX_VIOLATION_RESULTS = 40;
-const MAX_INCIDENTS_RESULTS = 40;
+const TIME_FOR_TOKEN_DAYS = 365;
 
 const INCIDENT_PAGE_SIZE = 500;
 
@@ -111,8 +139,8 @@ module.exports = {
   TIME_FOR_TOKEN_DAYS,
   POSSIBLE_TIME_KEYS,
   POSSIBLE_USER_KEYS,
-  MAX_VIOLATION_RESULTS,
   INCIDENT_QUERY_PATHS,
   INCIDENT_PAGE_SIZE,
-  MAX_INCIDENTS_RESULTS
+  QUERY_SORT_KEYS,
+  MAX_AUTH_RETRIES
 };
