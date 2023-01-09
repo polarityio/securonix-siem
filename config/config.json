@@ -1,0 +1,73 @@
+{
+  "name": "Securonix",
+  "acronym": "SX",
+  "description": "Search Securonix for User Violation and Incident information on Emails, Domains, and IPs",
+  "entityTypes": [
+    "IPv4",
+    "email",
+    "domain"
+  ],
+  "customTypes": [],
+  "styles": [
+    "./styles/styles.less"
+  ],
+  "defaultColor": "light-blue",
+  "onDemandOnly": true,
+  "block": {
+    "component": {
+      "file": "./components/block.js"
+    },
+    "template": {
+      "file": "./templates/block.hbs"
+    }
+  },
+  "request": {
+    "cert": "",
+    "key": "",
+    "passphrase": "",
+    "ca": "",
+    "proxy": "",
+    "rejectUnauthorized": true
+  },
+  "logging": {
+    "level": "info"
+  },
+  "options": [
+    {
+      "key": "url",
+      "name": "Url",
+      "description": "The base URL for the Securonix API including the schema (i.e., https://)",
+      "default": "",
+      "type": "text",
+      "userCanEdit": false,
+      "adminOnly": true
+    },
+    {
+      "key": "username",
+      "name": "Username",
+      "description": "Valid Securonix Username",
+      "default": "",
+      "type": "text",
+      "userCanEdit": true,
+      "adminOnly": false
+    },
+    {
+      "key": "password",
+      "name": "Password",
+      "description": "Password for the provided Securonix username",
+      "default": "",
+      "type": "password",
+      "userCanEdit": true,
+      "adminOnly": false
+    },
+    {
+      "key": "monthsBack",
+      "name": "Months Back",
+      "description": "The number of months you would like to look back for violations (decimals work as well, e.g. 0.25)",
+      "default": 6,
+      "type": "number",
+      "userCanEdit": true,
+      "adminOnly": false
+    }
+  ]
+}
