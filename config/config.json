@@ -1,4 +1,5 @@
 {
+  "polarityIntegrationUuid": "e2922590-cce1-11ed-aeee-075d3490155d",
   "name": "Securonix",
   "acronym": "SX",
   "description": "Search Securonix for User Violation and Incident information on Emails, Domains, and IPs",
