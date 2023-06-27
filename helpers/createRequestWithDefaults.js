@@ -24,8 +24,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     ...(_configFieldIsValid(key) && { key: fs.readFileSync(key) }),
     ...(_configFieldIsValid(passphrase) && { passphrase }),
     ...(_configFieldIsValid(proxy) && { proxy }),
-    ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized }),
-    rejectUnauthorized: false
+    ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized })
   };
 
   const requestWithDefaultsBuilder = (
