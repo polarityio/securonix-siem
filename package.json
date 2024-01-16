@@ -9,7 +9,7 @@
     "aigle": "^1.14.1",
     "async": "^3.2.4",
     "lodash": "^4.17.21",
-    "moment": "^2.29.4",
+    "moment": "^2.30.0",
     "node-cache": "^5.1.2",
     "postman-request": "^2.88.1-postman.31"
   }
