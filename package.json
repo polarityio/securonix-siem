@@ -1,16 +1,15 @@
 {
   "name": "securonix",
-  "version": "3.2.4",
+  "version": "3.3.0",
   "main": "./integration.js",
   "private": true,
   "license": "MIT",
   "author": "Polarity",
   "dependencies": {
-    "aigle": "^1.14.1",
-    "async": "^3.2.4",
+    "async": "^3.2.5",
     "lodash": "^4.17.21",
-    "moment": "^2.29.4",
+    "moment": "^2.30.1",
     "node-cache": "^5.1.2",
-    "postman-request": "^2.88.1-postman.31"
+    "postman-request": "^2.88.1-postman.33"
   }
 }
