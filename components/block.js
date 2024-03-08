@@ -6,18 +6,18 @@ polarity.export = PolarityComponent.extend({
   // number of violations to show per page
   itemsPerPage: 5,
   watchListHasBeenCalled: false,
-  tabNames: ['violation', 'associatedUsers', 'users', 'riskscore', 'tpi'],
+  tabNames: ['violations', 'associatedUsers', 'users', 'riskscore', 'tpi', 'activity'],
   watchLists: null,
   expandableTitleStates: {
     allFields: {},
     datetime: {}
   },
   pagedViolations: Ember.computed(
-    'details.violation',
+    'details.violations',
     'block._state.violation.endItem',
     'block._state.violation.startItem',
     function () {
-      let originalViolations = this.get('details.violation');
+      let originalViolations = this.get('details.violations');
       let itemsPerPage = this.get('itemsPerPage');
       let pageNumber = this.get('block._state.violation.pageNumber');
       let slicedViolations;
@@ -34,6 +34,28 @@ polarity.export = PolarityComponent.extend({
       return slicedViolations;
     }
   ),
+  pagedEvents: Ember.computed(
+      'details.events',
+      'block._state.events.endItem',
+      'block._state.events.startItem',
+      function () {
+        let originalViolations = this.get('details.violations');
+        let itemsPerPage = this.get('itemsPerPage');
+        let pageNumber = this.get('block._state.violation.pageNumber');
+        let slicedViolations;
+
+        slicedViolations = originalViolations.slice(
+            this.get('block._state.violation.startItem') - 1,
+            this.get('block._state.violation.endItem')
+        );
+
+        slicedViolations.forEach((violation, index) => {
+          violation.index = (pageNumber - 1) * itemsPerPage + (index + 1);
+        });
+
+        return slicedViolations;
+      }
+  ),
   init() {
     if (!this.get('block._state')) {
       this.set('block._state', {});
@@ -41,6 +63,10 @@ polarity.export = PolarityComponent.extend({
       this.set('block._state.violation.startItem', 1);
       this.set('block._state.violation.endItem', this.get('itemsPerPage'));
       this.set('block._state.violation.pageNumber', 1);
+      this.set('block._state.events', {});
+      this.set('block._state.events.startItem', 1);
+      this.set('block._state.events.endItem', this.get('itemsPerPage'));
+      this.set('block._state.events.pageNumber', 1);
 
       const initialTab = this.tabNames
         .filter((tabName) => this.get(`details.${tabName}.length`))
@@ -67,7 +93,7 @@ polarity.export = PolarityComponent.extend({
     changePage(value) {
       const perPage = this.get('itemsPerPage');
       const pageNumber = this.get('block._state.violation.pageNumber');
-      const totalItems = this.get('details.violation.length');
+      const totalItems = this.get('details.violations.length');
       const minPage = 1;
       const maxPage = Math.ceil(totalItems / perPage);
       let tempPageNumber;

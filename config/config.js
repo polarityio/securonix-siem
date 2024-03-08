@@ -1,7 +1,8 @@
 module.exports = {
   name: 'Securonix',
   acronym: 'SX',
-  description: 'Search Securonix for User Violation and Incident information on Emails, Domains, and IPs',
+  description:
+    'Search Securonix for User Violation and Incident information on Emails, Domains, and IPs',
   entityTypes: [
     'ipv4',
     'email',
@@ -36,7 +37,7 @@ module.exports = {
     key: '',
     passphrase: '',
     ca: '',
-    proxy: ""
+    proxy: ''
   },
   logging: {
     level: 'info' //trace, debug, info, warn, error, fatal
@@ -44,7 +45,7 @@ module.exports = {
   options: [
     {
       key: 'url',
-      name: 'Url',
+      name: 'URL',
       description:
         'The base URL for the Securonix API including the schema (i.e., https://)',
       default: '',
@@ -58,8 +59,8 @@ module.exports = {
       description: 'Valid Securonix Username',
       default: '',
       type: 'text',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
       key: 'password',
@@ -67,18 +68,60 @@ module.exports = {
       description: 'Password for the provided Securonix username',
       default: '',
       type: 'password',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
     },
     {
-      key: 'monthsBack',
-      name: 'Months Back',
+      key: 'searchCategories',
+      name: 'Search Categories',
+      description: 'Select one or more categories to search',
+      default: [
+        { display: 'Violations', value: 'violations' },
+        { display: 'TPI', value: 'tpi' },
+        { display: 'Users', value: 'users' },
+        { display: 'Risk Score', value: 'riskscore' }
+      ],
+      type: 'select',
+      options: [
+        { display: 'Violations', value: 'violations' },
+        { display: 'TPI', value: 'tpi' },
+        { display: 'Users', value: 'users' },
+        { display: 'Risk Score', value: 'riskscore' },
+        { display: 'Activity (Events)', value: 'activity' }
+      ],
+      multiple: true,
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'daysBack',
+      name: 'Violation Days Back',
       description:
-        'The number of months you would like to look back for violations (decimals work as well, e.g. 0.25)',
-      default: 6,
+        'The number of days you would like to look back for violations. Supports fractional days (e.g., 0.25 would be 8 hours).',
+      default: 7,
       type: 'number',
-      userCanEdit: true,
-      adminOnly: false
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'eventsDaysBack',
+      name: 'Activity (Events) Days Back',
+      description:
+        'The number of days you would like to look back for activity (events). Supports fractional days (e.g., 0.25 would be 8 hours).  It is not recommended to search back more than 7 days.',
+      default: 1,
+      type: 'number',
+      userCanEdit: false,
+      adminOnly: true
+    },
+    {
+      key: 'activitySearchFilter',
+      name: 'Activity (Events) Search Filter',
+      description:
+        'A filter you would like to apply to the Activity search.  For example, it\'s recommended to filter by "resourcegroupname" in which case the Activity Search Filter value would be `resourcegroupname="my_resource_group"`.',
+      default: '',
+      type: 'text',
+      userCanEdit: false,
+      adminOnly: true
     }
   ]
 };

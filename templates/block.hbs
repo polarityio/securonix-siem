@@ -8,6 +8,7 @@
           href='#'
         >
           {{titleize (humanize (dasherize tabName))}}
+          ({{get details (concat tabName ".length")}})
         </a>
       </li>
     {{/if}}
@@ -162,7 +163,7 @@
   </div>
 {{/if}}
 
-{{#if (eq block._state.activeTab 'violation')}}
+{{#if (eq block._state.activeTab 'violations')}}
   <div class='view-in-ts'>
     <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
       Securonix
@@ -505,4 +506,8 @@
       </div>
     {{/each}}
   </div>
+{{/if}}
+
+{{#if (eq block._state.activeTab 'events')}}
+
 {{/if}}

@@ -92,6 +92,11 @@ const QUERY_KEYS = {
     ],
     hostname: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl']
   },
+  activity: {
+    ip: ['ipaddress'],
+    email: ['workemail'],
+    domain: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl']
+  },
   users: {
     email: ['workemail']
   },
