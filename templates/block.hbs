@@ -8,7 +8,11 @@
           href='#'
         >
           {{titleize (humanize (dasherize tabName))}}
-          ({{get details (concat tabName ".length")}})
+          {{#if (eq tabName "activity")}}
+            ({{get details (concat tabName ".events.length")}})
+          {{else}}
+            ({{get details (concat tabName ".length")}})
+          {{/if}}
         </a>
       </li>
     {{/if}}
@@ -360,7 +364,6 @@
   </div>
 {{/if}}
 
-
 {{#if (eq block._state.activeTab 'associatedUsers')}}
   <div class='view-in-ts'>
     <a class='p-link' href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard'>View in
@@ -508,6 +511,51 @@
   </div>
 {{/if}}
 
-{{#if (eq block._state.activeTab 'events')}}
-
+{{#if (eq block._state.activeTab 'activity')}}
+  <div class='view-in-ts'>
+    <a
+      class='p-link'
+      href='{{block.userOptions.url}}/Snypr/spotter/loadDashboard?viewjobQueryId={{details.activity.queryId}}'
+    >View results in Spotter
+      {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
+  </div>
+  {{#each details.activity.events as | event index |}}
+    <ul class="nav nav-tabs mt-2 d-flex align-items-center justify-content-between">
+      <div>
+        <li class="nav-item nav-title">
+          {{fa-icon icon="file-alt" fixedWidth=true}}
+          Event #{{inc index}}
+        </li>
+      </div>
+      <div class="d-flex">
+        <li class="nav-item">
+          <a {{action "showActivityTable" index}} class="nav-link {{if event.__showTable "active"}}" href="#">Table</a>
+        </li>
+        <li class="nav-item">
+          <a {{action "showActivityJson" index}} class="nav-link {{if event.__showJson "active"}}" href="#">JSON</a>
+        </li>
+        <li class="nav-item nav-title view-action pl-2 pr-0">
+          <span class="p-action"
+            {{action "toggleActivityViewer" index}}
+          >
+            {{#if event.__expanded}}
+              Hide {{fa-icon icon="caret-up" fixedWidth=true}}
+            {{else}}
+              View {{fa-icon icon="caret-down" fixedWidth=true}}
+            {{/if}}
+          </span>
+        </li>
+      </div>
+    </ul>
+    {{#if (and event.__showTable event.__expanded)}}
+      <div class="activity-tab-container fields-table">
+        {{object-to-table event}}
+      </div>
+    {{/if}}
+    {{#if (and event.__showJson event.__expanded)}}
+      <div class="activity-tab-container json-block">
+        <pre>{{{event.__json}}}</pre>
+      </div>
+    {{/if}}
+  {{/each}}
 {{/if}}

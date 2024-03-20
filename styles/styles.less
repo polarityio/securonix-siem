@@ -1,3 +1,5 @@
+@activity-max-height: 300px;
+
 .time-container {
   background-color: #ddd;
   padding-left: 5px;
@@ -8,6 +10,14 @@
   margin-right: 4px;
   border-radius: 2px;
   display: inline-block;
+}
+
+.nav-title{
+  padding: 0.5rem 1rem 0.5rem 0;
+
+  &.view-action {
+    width: 55px;
+  }
 }
 
 .view-in-ts {
@@ -52,7 +62,7 @@ pre {
 }
 
 .scrollable-container {
-  max-height: 300px;
+  max-height: @activity-max-height;
   overflow-y: scroll;
   border: 1px solid #dee2e6;
   padding: 5px;
@@ -80,5 +90,69 @@ pre {
     &:active {
       color: darken(#7bc942, 30%);
     }
+  }
+}
+
+div.fields-table {
+  font-size: 12px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  max-height: 500px;
+  margin-bottom: 10px;
+  line-height: 1em;
+
+  table {
+    thead {
+      display: none;
+    }
+
+    tbody {
+      td {
+        border-bottom: 1px solid rgb(217, 217, 217);
+      }
+
+      tr:nth-child(odd) {
+        background-color: #fff;
+      }
+
+      tr:last-child {
+        td {
+          border-bottom: none;
+        }
+      }
+
+      td:first-child {
+        min-width: 35%;
+        width: 35%;
+      }
+    }
+  }
+}
+
+div.activity-tab-container {
+  margin-top: 5px;
+  max-height: @activity-max-height;
+  overflow-y: scroll;
+}
+
+div.json-block {
+  .string {
+    color: #d14;
+  }
+
+  .number {
+    color: #008080;
+  }
+
+  .boolean {
+    color: #008080;
+  }
+
+  .null {
+    color: #008080;
+  }
+
+  .key {
+    color: #333;
   }
 }

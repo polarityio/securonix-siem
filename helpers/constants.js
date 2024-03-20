@@ -95,7 +95,7 @@ const QUERY_KEYS = {
   activity: {
     ip: ['ipaddress'],
     email: ['workemail'],
-    domain: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname', 'requesturl']
+    domain: ['emailsenderdomain', 'sourcentdomain', 'destinationhostname']
   },
   users: {
     email: ['workemail']
@@ -137,6 +137,11 @@ const TIME_FOR_TOKEN_DAYS = 365;
 
 const INCIDENT_PAGE_SIZE = 500;
 
+// The minimum allowed value by the Securonix REST API is currently 300
+// Setting the value lower than 300 causes the default max to be used which
+// is 1000
+const MAX_ACTIVITY_EVENTS = 300;
+
 module.exports = {
   ASSOCIATED_USER_KEYS,
   VIOLATION_KEYS,
@@ -147,5 +152,6 @@ module.exports = {
   INCIDENT_QUERY_PATHS,
   INCIDENT_PAGE_SIZE,
   QUERY_SORT_KEYS,
-  MAX_AUTH_RETRIES
+  MAX_AUTH_RETRIES,
+  MAX_ACTIVITY_EVENTS
 };

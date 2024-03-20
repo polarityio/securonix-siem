@@ -34,44 +34,32 @@ polarity.export = PolarityComponent.extend({
       return slicedViolations;
     }
   ),
-  pagedEvents: Ember.computed(
-      'details.events',
-      'block._state.events.endItem',
-      'block._state.events.startItem',
-      function () {
-        let originalViolations = this.get('details.violations');
-        let itemsPerPage = this.get('itemsPerPage');
-        let pageNumber = this.get('block._state.violation.pageNumber');
-        let slicedViolations;
-
-        slicedViolations = originalViolations.slice(
-            this.get('block._state.violation.startItem') - 1,
-            this.get('block._state.violation.endItem')
-        );
-
-        slicedViolations.forEach((violation, index) => {
-          violation.index = (pageNumber - 1) * itemsPerPage + (index + 1);
-        });
-
-        return slicedViolations;
-      }
-  ),
   init() {
     if (!this.get('block._state')) {
       this.set('block._state', {});
+
       this.set('block._state.violation', {});
       this.set('block._state.violation.startItem', 1);
       this.set('block._state.violation.endItem', this.get('itemsPerPage'));
       this.set('block._state.violation.pageNumber', 1);
-      this.set('block._state.events', {});
-      this.set('block._state.events.startItem', 1);
-      this.set('block._state.events.endItem', this.get('itemsPerPage'));
-      this.set('block._state.events.pageNumber', 1);
 
-      const initialTab = this.tabNames
+      this.set('block._state.activity', {});
+      this.set('block._state.activity.startItem', 1);
+      this.set('block._state.activity.endItem', this.get('itemsPerPage'));
+      this.set('block._state.activity.pageNumber', 1);
+
+      let initialTab = this.tabNames
         .filter((tabName) => this.get(`details.${tabName}.length`))
         .shift();
+      if(!initialTab){
+        // no other tabs so default to activity
+        initialTab = 'activity';
+      }
       this.set('block._state.activeTab', initialTab);
+
+      if(this.get('details.activity.events')){
+        this.initActivityTabs();
+      }
     }
 
     this._super(...arguments);
@@ -117,6 +105,73 @@ polarity.export = PolarityComponent.extend({
       this.set('block._state.violation.startItem', startItem);
       this.set('block._state.violation.endItem', endItem);
       this.set('block._state.violation.pageNumber', tempPageNumber);
+    },
+    toggleActivityViewer: function (index) {
+      this.toggleProperty('details.activity.events.' + index + '.__expanded');
+      const isExpanded = this.get('details.activity.events.' + index + '.__expanded');
+      const showJson = this.get('details.activity.events.' + index + '.__showJson');
+      const showTable = this.get('details.activity.events.' + index + '.__showTable');
+      if (isExpanded && !showJson && !showTable) {
+        this.set('details.activity.events.' + index + '.__showTable', true);
+      } else if (!isExpanded) {
+        this.set('details.activity.events.' + index + '.__showJson', false);
+        this.set('details.activity.events.' + index + '.__showTable', false);
+      }
+    },
+    showActivityTable: function (index) {
+      this.set('details.activity.events.' + index + '.__showTable', true);
+      this.set('details.activity.events.' + index + '.__showJson', false);
+      this.set('details.activity.events.' + index + '.__expanded', true);
+    },
+    showActivityJson: function (index) {
+      if (
+        typeof this.get('details.activity.events.' + index + '.__json') === 'undefined'
+      ) {
+        this.set(
+          'details.activity.events.' + index + '.__json',
+          this.syntaxHighlight(
+            JSON.stringify(this.get('details.activity.events.' + index), null, 4)
+          )
+        );
+      }
+      this.set('details.activity.events.' + index + '.__showTable', false);
+      this.set('details.activity.events.' + index + '.__showJson', true);
+      this.set('details.activity.events.' + index + '.__expanded', true);
     }
+  },
+  initActivityTabs() {
+
+    this.get('details.activity.events').forEach((result, index) => {
+      if (index !== 0) {
+        Ember.set(result, '__showTable', false);
+        Ember.set(result, '__showJson', false);
+        Ember.set(result, '__expanded', false);
+      } else {
+        Ember.set(result, '__showTable', true);
+        Ember.set(result, '__showJson', false);
+        Ember.set(result, '__expanded', true);
+      }
+    });
+  },
+  syntaxHighlight(json) {
+    json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return json.replace(
+      /("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g,
+      function (match) {
+        var cls = 'number';
+        if (/^"/.test(match)) {
+          if (/:$/.test(match)) {
+            cls = 'key';
+          } else {
+            cls = 'string';
+          }
+        } else if (/true|false/.test(match)) {
+          cls = 'boolean';
+        } else if (/null/.test(match)) {
+          cls = 'null';
+        }
+        return '<span class="' + cls + '">' + match + '</span>';
+      }
+    );
   }
 });

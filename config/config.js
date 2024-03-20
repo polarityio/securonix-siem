@@ -2,7 +2,7 @@ module.exports = {
   name: 'Securonix',
   acronym: 'SX',
   description:
-    'Search Securonix for User Violation and Incident information on Emails, Domains, and IPs',
+    'Search Securonix for User Violation and Activity (Event) information on Emails, Domains, and IPs',
   entityTypes: [
     'ipv4',
     'email',
@@ -51,7 +51,7 @@ module.exports = {
       default: '',
       type: 'text',
       userCanEdit: false,
-      adminOnly: true
+      adminOnly: false
     },
     {
       key: 'username',

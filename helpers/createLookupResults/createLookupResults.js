@@ -19,7 +19,7 @@ const getLookupResults = (responses, entity, Logger) => {
 
   // sorts responses and returns the results associated with the query type in an object.
   for (let [queryKey, response] of Object.entries(responses)) {
-    if (get('length', response.value)) {
+    if (size(response.value)) {
       processedResponses[queryKey] = processResponses(queryKey, response, Logger);
     }
   }
@@ -80,7 +80,7 @@ const createSummaryTags = (apiData) => {
   const getPathSize = (path) => flow(get(path), size)(apiData);
 
   const userSize = getPathSize('users');
-  if (userSize) tags.push(`User Size: ${userSize}`);
+  if (userSize) tags.push(`Users: ${userSize}`);
 
   const violationSize = getPathSize('violations');
   if (violationSize) tags.push(`Violations: ${violationSize}`);
@@ -97,7 +97,7 @@ const createSummaryTags = (apiData) => {
   const asset = getPathSize('asset');
   if (asset) tags.push(`Asset: ${asset}`);
 
-  const activity = getPathSize('activity');
+  const activity = getPathSize('activity.events');
   if (activity) tags.push(`Activity: ${activity}`);
 
   return tags;

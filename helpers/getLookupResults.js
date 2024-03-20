@@ -54,7 +54,7 @@ const getLookupResults = async (entity, options, requestFunctions, Logger) => {
       key: 'riskscore' // key is the sort key
     },
     activity: {
-      value: activity ? activity : []
+      value: activity ? activity : {}
     }
     // assets: {
     //   value: assets,
