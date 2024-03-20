@@ -4,7 +4,7 @@ module.exports = {
   description:
     'Search Securonix for User Violation and Activity (Event) information on Emails, Domains, and IPs',
   entityTypes: [
-    'ipv4',
+    'IPv4',
     'email',
     'domain'
     //,'string'
