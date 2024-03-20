@@ -181,7 +181,7 @@
       <div class="violation-container">
         <h1 class='p-title'>
           {{fa-icon icon='do-not-enter' fixedWidth=true}}
-            #{{violation.index}} -
+            #{{inc violation.index}} -
           {{violation.riskthreatname}}
         </h1>
         {{#if violation.policyname}}
@@ -352,14 +352,20 @@
     {{/each}}
     <div class="paging-container mt-2 d-flex align-items-center justify-content-between">
       <div>
-        <span class="next-hit-stats">Violations {{block._state.violation.startItem}} to {{block._state.violation.endItem}} of {{details.violation.length}}</span>
+        {{#if block._state.violation.allResultsReturned}}
+          <span class="next-hit-stats">Showing all {{details.violations.length}} violations</span>
+        {{else}}
+          <span class="next-hit-stats">Violations {{block._state.violation.startItem}} to {{block._state.violation.endItem}} of {{details.violations.length}}</span>
+        {{/if}}
       </div>
-      <div>
-        <span title="First Page" {{action "changePage" "firstPage"}} class="next-hit-button p-action">{{fa-icon icon="chevron-double-left" fixedWidth=true}}</span>
-        <span title="Previous Page" {{action "changePage" -1}} class="next-hit-button p-action">{{fa-icon icon="chevron-left" fixedWidth=true}}</span>
-        <span title="Next Page" {{action "changePage" 1}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-right" fixedWidth=true}}</span>
-        <span title="Last Page" {{action "changePage" "lastPage"}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-double-right" fixedWidth=true}}</span>
-      </div>
+      {{#unless block._state.violation.allResultsReturned}}
+        <div>
+          <span title="First Page" {{action "changeViolationPage" "firstPage"}} class="next-hit-button p-action">{{fa-icon icon="chevron-double-left" fixedWidth=true}}</span>
+          <span title="Previous Page" {{action "changeViolationPage" -1}} class="next-hit-button p-action">{{fa-icon icon="chevron-left" fixedWidth=true}}</span>
+          <span title="Next Page" {{action "changeViolationPage" 1}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-right" fixedWidth=true}}</span>
+          <span title="Last Page" {{action "changeViolationPage" "lastPage"}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-double-right" fixedWidth=true}}</span>
+        </div>
+      {{/unless}}
     </div>
   </div>
 {{/if}}
@@ -519,12 +525,12 @@
     >View results in Spotter
       {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
   </div>
-  {{#each details.activity.events as | event index |}}
+  {{#each pagedActivity as | event index |}}
     <ul class="nav nav-tabs mt-2 d-flex align-items-center justify-content-between">
       <div>
         <li class="nav-item nav-title">
           {{fa-icon icon="file-alt" fixedWidth=true}}
-          Event #{{inc index}}
+          Event #{{inc event.index}}
         </li>
       </div>
       <div class="d-flex">
@@ -536,7 +542,7 @@
         </li>
         <li class="nav-item nav-title view-action pl-2 pr-0">
           <span class="p-action"
-            {{action "toggleActivityViewer" index}}
+            {{action "toggleActivityViewer" event.index}}
           >
             {{#if event.__expanded}}
               Hide {{fa-icon icon="caret-up" fixedWidth=true}}
@@ -558,4 +564,21 @@
       </div>
     {{/if}}
   {{/each}}
+  <div class="paging-container mt-2 d-flex align-items-center justify-content-between">
+    <div>
+      {{#if block._state.activity.allResultsReturned}}
+        <span class="next-hit-stats">Showing all {{details.activity.events.length}} events</span>
+      {{else}}
+        <span class="next-hit-stats">Activity {{block._state.activity.startItem}} to {{block._state.activity.endItem}} of {{details.activity.events.length}}</span>
+      {{/if}}
+    </div>
+    {{#unless block._state.activity.allResultsReturned}}
+      <div>
+        <span title="First Page" {{action "changeActivityPage" "firstPage"}} class="next-hit-button p-action">{{fa-icon icon="chevron-double-left" fixedWidth=true}}</span>
+        <span title="Previous Page" {{action "changeActivityPage" -1}} class="next-hit-button p-action">{{fa-icon icon="chevron-left" fixedWidth=true}}</span>
+        <span title="Next Page" {{action "changeActivityPage" 1}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-right" fixedWidth=true}}</span>
+        <span title="Last Page" {{action "changeActivityPage" "lastPage"}} class="next-hit-button ml-1 p-action">{{fa-icon icon="chevron-double-right" fixedWidth=true}}</span>
+      </div>
+    {{/unless}}
+  </div>
 {{/if}}

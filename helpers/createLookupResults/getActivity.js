@@ -48,11 +48,6 @@ const getActivity = async (entity, options, requestsInParallel, Logger) => {
       return;
     }
 
-    // Securonix REST API currently has a bug where the "max" query parameter has no effect.
-    // This has been reported to Securonix.  To prevent too much data from being sent back to
-    // the Overlay Window we slice the array here on the server and only return the first 25 results.
-    eventResponse.events = eventResponse.events.slice(0, 25);
-
     // The `rawevent` is a large string that we don't currently use in the template so we remove it
     // to make it easier to render the keys in the template
     eventResponse.events.forEach((event) => {

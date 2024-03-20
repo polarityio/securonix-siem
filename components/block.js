@@ -27,37 +27,77 @@ polarity.export = PolarityComponent.extend({
         this.get('block._state.violation.endItem')
       );
 
-      slicedViolations.forEach((violation, index) => {
-        violation.index = (pageNumber - 1) * itemsPerPage + (index + 1);
-      });
-
       return slicedViolations;
+    }
+  ),
+  pagedActivity: Ember.computed(
+    'details.activity.events',
+    'block._state.activity.endItem',
+    'block._state.activity.startItem',
+    function () {
+      let originalEvents = this.get('details.activity.events');
+      let itemsPerPage = this.get('itemsPerPage');
+      let pageNumber = this.get('block._state.activity.pageNumber');
+      let slicedEvents;
+
+      slicedEvents = originalEvents.slice(
+        this.get('block._state.activity.startItem') - 1,
+        this.get('block._state.activity.endItem')
+      );
+
+      return slicedEvents;
     }
   ),
   init() {
     if (!this.get('block._state')) {
       this.set('block._state', {});
 
+      // Setup paging for violations
       this.set('block._state.violation', {});
       this.set('block._state.violation.startItem', 1);
       this.set('block._state.violation.endItem', this.get('itemsPerPage'));
       this.set('block._state.violation.pageNumber', 1);
 
+      if (this.get('details.violations.length') <= this.get('itemsPerPage')) {
+        this.set('block._state.violation.allResultsReturned', true);
+      }
+
+      if (this.get('details.violations.length') > 0) {
+        this.get('details.violations').forEach((violation, index) => {
+          // We set the overall index on the violation so we know the position of the
+          // violation when we do paging.
+          this.set('details.violations.' + index + '.index', index);
+        });
+      }
+
+      // Setup paging for Activity Events
       this.set('block._state.activity', {});
       this.set('block._state.activity.startItem', 1);
       this.set('block._state.activity.endItem', this.get('itemsPerPage'));
       this.set('block._state.activity.pageNumber', 1);
 
+      if (this.get('details.activity.events.length') <= this.get('itemsPerPage')) {
+        this.set('block._state.activity.allResultsReturned', true);
+      }
+
+      if (this.get('details.activity.events.length') > 0) {
+        this.get('details.activity.events').forEach((event, index) => {
+          // We set the overall index on the events (activity) so we know the position of the
+          // event when we do paging.
+          this.set('details.activity.events.' + index + '.index', index);
+        });
+      }
+
       let initialTab = this.tabNames
         .filter((tabName) => this.get(`details.${tabName}.length`))
         .shift();
-      if(!initialTab){
+      if (!initialTab) {
         // no other tabs so default to activity
         initialTab = 'activity';
       }
       this.set('block._state.activeTab', initialTab);
 
-      if(this.get('details.activity.events')){
+      if (this.get('details.activity.events')) {
         this.initActivityTabs();
       }
     }
@@ -78,7 +118,7 @@ polarity.export = PolarityComponent.extend({
       );
       this.set(`expandableTitleStates.${type}`, modifiedExpandableTitleStates);
     },
-    changePage(value) {
+    changeViolationPage(value) {
       const perPage = this.get('itemsPerPage');
       const pageNumber = this.get('block._state.violation.pageNumber');
       const totalItems = this.get('details.violations.length');
@@ -105,6 +145,34 @@ polarity.export = PolarityComponent.extend({
       this.set('block._state.violation.startItem', startItem);
       this.set('block._state.violation.endItem', endItem);
       this.set('block._state.violation.pageNumber', tempPageNumber);
+    },
+    changeActivityPage(value) {
+      const perPage = this.get('itemsPerPage');
+      const pageNumber = this.get('block._state.activity.pageNumber');
+      const totalItems = this.get('details.activity.events.length');
+      const minPage = 1;
+      const maxPage = Math.ceil(totalItems / perPage);
+      let tempPageNumber;
+      if (value === 'firstPage') {
+        tempPageNumber = 1;
+      } else if (value === 'lastPage') {
+        tempPageNumber = maxPage;
+      } else {
+        tempPageNumber = pageNumber + value;
+      }
+
+      // Can't go below min page (1) or above max page
+      if (tempPageNumber < minPage || tempPageNumber > maxPage) {
+        return;
+      }
+
+      const startItem = (tempPageNumber - 1) * perPage + 1;
+      const endItem =
+        tempPageNumber * perPage > totalItems ? totalItems : tempPageNumber * perPage;
+
+      this.set('block._state.activity.startItem', startItem);
+      this.set('block._state.activity.endItem', endItem);
+      this.set('block._state.activity.pageNumber', tempPageNumber);
     },
     toggleActivityViewer: function (index) {
       this.toggleProperty('details.activity.events.' + index + '.__expanded');
@@ -140,17 +208,10 @@ polarity.export = PolarityComponent.extend({
     }
   },
   initActivityTabs() {
-
     this.get('details.activity.events').forEach((result, index) => {
-      if (index !== 0) {
-        Ember.set(result, '__showTable', false);
-        Ember.set(result, '__showJson', false);
-        Ember.set(result, '__expanded', false);
-      } else {
-        Ember.set(result, '__showTable', true);
-        Ember.set(result, '__showJson', false);
-        Ember.set(result, '__expanded', true);
-      }
+      Ember.set(result, '__showTable', true);
+      Ember.set(result, '__showJson', false);
+      Ember.set(result, '__expanded', true);
     });
   },
   syntaxHighlight(json) {
