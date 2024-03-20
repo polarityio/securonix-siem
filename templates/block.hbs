@@ -75,10 +75,18 @@
           {{fa-icon icon='external-link-square' class='external-link-icon'}}</a>
       </div>
       {{#each details.tpi as |tpi|}}
-        <h1 class='p-title'>
-          {{fa-icon icon='info' fixedWidth=true}}
-          {{tpi.tpi_ip}}
-        </h1>
+        {{#if tpi.tpi_ip}}
+          <h1 class='p-title'>
+            {{fa-icon icon='network-wired' fixedWidth=true}}
+            {{tpi.tpi_ip}}
+          </h1>
+        {{else if tpi.tpi_domain}}
+          <h1 class='p-title'>
+            {{fa-icon icon='globe' fixedWidth=true}}
+            {{tpi.tpi_domain}}
+          </h1>
+        {{/if}}
+
         {{#if tpi.tpi_criticality}}
           <div>
             <span class='p-key'>TPI Criticality:</span>

@@ -54,6 +54,7 @@ const doLookup = async (entities, options, cb) => {
       }, entities)
     );
     Logger.debug({ lookupResults }, 'doLookup lookupResults');
+
     return cb(null, lookupResults);
   } catch (error) {
     const err = parseErrorToReadableJSON(error);
