@@ -97,8 +97,8 @@ module.exports = {
       key: 'daysBack',
       name: 'Violation Days Back',
       description:
-        'The number of days you would like to look back for violations. Supports fractional days (e.g., 0.25 would be 8 hours).',
-      default: 7,
+        'The number of days you would like to look back for violations. Supports fractional days (e.g., 0.25 would be 8 hours).  Defaults to 5 days.',
+      default: 5,
       type: 'number',
       userCanEdit: false,
       adminOnly: true
