@@ -1,48 +1,67 @@
+const async = require('async');
+
 const createLookupResults = require('./createLookupResults/index');
 const getViolationResponse = require('./getViolationResponse');
 const getUsersByEmail = require('./createLookupResults/getUsersByEmail');
 const getTpi = require('./createLookupResults/getTpi');
 const getRiskHistory = require('./createLookupResults/getRiskHistory');
+const getActivity = require('./createLookupResults/getActivity');
 // const getAssets = require('./createLookupResults/getAssets');
 
-const getLookupResults = async (entity, options, requestFunctions, Logger) => {
-  const [violations, users, tpi, riskscore, /* assets */] = await Promise.all([
-    getViolationResponse(entity, options, requestFunctions.requestsInParallel, Logger),
-    getUsersByEmail(entity, options, requestFunctions.requestsInParallel, Logger),
-    getTpi(entity, options, requestFunctions.requestsInParallel, Logger),
-    getRiskHistory(entity, options, requestFunctions.requestsInParallel, Logger),
-    // getAssets(entity, options, requestFunctions.requestsInParallel, Logger)
-  ]);
+const categoryToFunc = {
+  violations: getViolationResponse,
+  users: getUsersByEmail,
+  tpi: getTpi,
+  riskscore: getRiskHistory,
+  activity: getActivity
+};
 
+const getLookupResults = async (entity, options, requestFunctions, Logger) => {
+  const searches = {};
+
+  options.searchCategories.forEach((category) => {
+    searches[category.value] = async () =>
+      categoryToFunc[category.value](
+        entity,
+        options,
+        requestFunctions.requestsInParallel,
+        Logger
+      );
+  });
+
+  const { violations, tpi, users, riskscore, activity } = await async.parallel(searches);
+
+  // `direction` is the sort direction for the data
+  // `key` is the key that the data is sorted on
+  // If not provided the data is not sorted
   const responses = {
-    violation: {
-      value: violations,
+    violations: {
+      value: violations ? violations : [],
       direction: 'desc',
-      key: 'violationCount'
+      key: 'violationCount' // key is the sort key
     },
     tpi: {
-      value: tpi,
-      direction: 'desc',
-      key: 'tpiIpCount'
+      value: tpi ? tpi : [],
+      direction: 'desc', // direction is the
+      key: 'tpiIpCount' // key is the sort key
     },
     users: {
-      value: users,
-      direction: 'desc',
-      key: 'usersCount'
+      value: users ? users : []
     },
     riskscore: {
-      value: riskscore,
+      value: riskscore ? riskscore : [],
       direction: 'desc',
-      key: 'riskscoreCount'
+      key: 'riskscore' // key is the sort key
     },
+    activity: {
+      value: activity ? activity : {}
+    }
     // assets: {
     //   value: assets,
     //   direction: 'desc',
     //   key: 'usersCount'
     // }
   };
-
-  Logger.trace({ responses }, 'Responses from lookups');
 
   const lookupResults = createLookupResults(responses, entity, Logger);
 

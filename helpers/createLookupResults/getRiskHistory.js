@@ -17,7 +17,9 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
           password: options.password,
           baseUrl: options.url
         },
-        qs: { query: `index=riskscore AND ${queryKey}=${entity.value}` },
+        qs: {
+            query: `index=riskscore AND ${queryKey}=${entity.value}`
+        },
         json: true
       }),
       userKeys

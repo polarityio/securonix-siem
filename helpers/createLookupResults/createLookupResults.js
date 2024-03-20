@@ -9,7 +9,7 @@ const createLookupResults = (responses, entity, foundIncidents, Logger) => {
 };
 
 const getLookupResults = (responses, entity, Logger) => {
-  let processedResponses;
+  let processedResponses = {};
 
   const processedViolationResponse = processesViolationResponse(
     responses,
@@ -19,36 +19,40 @@ const getLookupResults = (responses, entity, Logger) => {
 
   // sorts responses and returns the results associated with the query type in an object.
   for (let [queryKey, response] of Object.entries(responses)) {
-    if (get('length', response.value)) {
-      processedResponses = processResponses(queryKey, response, Logger);
+    if (size(response.value)) {
+      processedResponses[queryKey] = processResponses(queryKey, response, Logger);
     }
   }
 
   return (results = { ...processedResponses, ...processedViolationResponse });
 };
 
-const processResponses = (responseKey, response) => {
-  const { direction, key } = getOr({}, responseKey, response);
-  const sortedQueryResults = orderBy(key, direction, response.value);
+const processResponses = (responseKey, response, Logger) => {
+  const { direction, key } = response;
 
-  return { [responseKey]: sortedQueryResults };
+  if (direction && key) {
+    const sortedQueryResults = orderBy(key, direction, response.value);
+    return sortedQueryResults;
+  } else {
+    return response.value;
+  }
 };
 
 const processesViolationResponse = (responses, entity, Logger) => {
-  const associatedUsers = getAssociatedUsers(responses.violation.value, Logger);
+  const associatedUsers = getAssociatedUsers(responses.violations.value, Logger);
 
   const violations = getViolations(
     associatedUsers,
-    responses.violation.value,
+    responses.violations.value,
     entity.transformedEntityType,
     Logger
   );
 
-  // conditionally adding properties to violation response, property wont be added if there is no data.
+  // conditionally adding properties to violation response, property won't be added if there is no data.
   return {
     ...(get('length', associatedUsers) && { associatedUsers: associatedUsers }),
     ...(get('length', violations) && {
-      violation: violations
+      violations: violations
     })
   };
 };
@@ -76,9 +80,9 @@ const createSummaryTags = (apiData) => {
   const getPathSize = (path) => flow(get(path), size)(apiData);
 
   const userSize = getPathSize('users');
-  if (userSize) tags.push(`User Size: ${userSize}`);
+  if (userSize) tags.push(`Users: ${userSize}`);
 
-  const violationSize = getPathSize('violation');
+  const violationSize = getPathSize('violations');
   if (violationSize) tags.push(`Violations: ${violationSize}`);
 
   const associatedUsers = getPathSize('associatedUsers');
@@ -92,6 +96,9 @@ const createSummaryTags = (apiData) => {
 
   const asset = getPathSize('asset');
   if (asset) tags.push(`Asset: ${asset}`);
+
+  const activity = getPathSize('activity.events');
+  if (activity) tags.push(`Activity: ${activity}`);
 
   return tags;
 };

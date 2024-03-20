@@ -16,13 +16,15 @@ const getViolationResponse = async (entity, options, requestsInParallel, Logger)
           baseUrl: options.url
         },
         qs: {
-          ..._getTimeframeParams(options.monthsBack),
+          ..._getTimeframeParams(options.daysBack),
           query: `index=violation AND ${queryKey}=${entity.value}`
         },
         json: true
       }),
       ViolationKeys
     );
+
+    Logger.debug({ violationRequestsOptions }, 'getViolationResponse Request Options');
 
     const violationResults = await requestsInParallel(
       violationRequestsOptions,
@@ -36,14 +38,12 @@ const getViolationResponse = async (entity, options, requestsInParallel, Logger)
     throw err;
   }
 };
-
-const _getTimeframeParams = (monthsBack, dateTo) => ({
+const _getTimeframeParams = (daysBack) => ({
   generationtime_from: m
-    .utc(dateTo)
-    .subtract(Math.floor(Math.abs(monthsBack)), 'months')
-    .subtract((Math.abs(monthsBack) % 1) * 30.41, 'days')
+    .utc()
+    .subtract(Math.abs(daysBack * 24), 'hours')
     .format('MM/DD/YYYY HH:mm:ss'),
-  generationtime_to: m.utc(dateTo).format('MM/DD/YYYY HH:mm:ss')
+  generationtime_to: m.utc().format('MM/DD/YYYY HH:mm:ss')
 });
 
 module.exports = getViolationResponse;
