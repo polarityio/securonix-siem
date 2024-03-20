@@ -5,9 +5,9 @@ Securonix is a platform that delivers a next generation security analytics and o
 
 The Polarity Securonix integration allows Polarity to search the Securonix API to return User Violation and Activity (Event) information on Emails, Domains, and IPs as well as Custom Hostnames and Usernames defined by the user.
 
-<div>
-  <img width="400" alt="Integration Example" src="./assets/example-ip.png">
-</div>
+| ![violations example](assets/overlay-violations.png) | ![activity example](assets/overlay-activity.png) 
+|------------------------------------------------------|-------------------------------------|
+| *Violations Search Example*                          | *Activity (Events) Search Example*  |
 
 To learn more about Securonix please see their official website at [https://www.securonix.com/products/platform-overview/](https://www.securonix.com/products/platform-overview/)
 
