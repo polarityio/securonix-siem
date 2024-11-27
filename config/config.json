@@ -3,15 +3,35 @@
   "name": "Securonix",
   "acronym": "SX",
   "description": "Search Securonix for User Violation and Activity (Event) information on Emails, Domains, and IPs",
-  "entityTypes": [
+  "supportsAdditionalCustomTypes": true,
+  "dataTypes": [
     "IPv4",
     "email",
-    "domain"
+    "domain",
+    {
+      "type": "string",
+      "enabled": false
+    },
+    {
+      "name": "Username",
+      "description": "Replace this regex with a regex for your own usernames",
+      "editable": true,
+      "enabled": false,
+      "key": "username",
+      "regex": "/\\b[A-Z]{1}[0-9]{6}\\b/"
+    },
+    {
+      "name": "Hostname",
+      "description": "Replace this regex with a regex for your own hostnames",
+      "editable": true,
+      "enabled": false,
+      "key": "hostname",
+      "regex": "/\\w{3,}\\-\\w{3,}/"
+    }
   ],
+  "entityTypes": ["IPv4", "email", "domain"],
   "customTypes": [],
-  "styles": [
-    "./styles/styles.less"
-  ],
+  "styles": ["./styles/styles.less"],
   "defaultColor": "light-blue",
   "onDemandOnly": true,
   "block": {
@@ -21,13 +41,6 @@
     "template": {
       "file": "./templates/block.hbs"
     }
-  },
-  "request": {
-    "cert": "",
-    "key": "",
-    "passphrase": "",
-    "ca": "",
-    "proxy": ""
   },
   "logging": {
     "level": "info"
