@@ -3,7 +3,6 @@
   "name": "Securonix",
   "acronym": "SX",
   "description": "Search Securonix for User Violation and Activity (Event) information on Emails, Domains, and IPs",
-  "supportsAdditionalCustomTypes": true,
   "dataTypes": [
     "IPv4",
     "email",
@@ -13,6 +12,7 @@
       "enabled": false
     },
     {
+      "type": "custom",
       "name": "Username",
       "description": "Replace this regex with a regex for your own usernames",
       "editable": true,
@@ -21,6 +21,7 @@
       "regex": "/\\b[A-Z]{1}[0-9]{6}\\b/"
     },
     {
+      "type": "custom",
       "name": "Hostname",
       "description": "Replace this regex with a regex for your own hostnames",
       "editable": true,
