@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { map, get, identity, compact, includes, getOr } = require('lodash/fp');
 const { parallelLimit } = require('async');
 const request = require('postman-request');
@@ -8,24 +7,13 @@ const getAuthToken = require('./getAuthToken');
 const SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES = [200];
 const RETRY_STATUS_CODES = [401, 403];
 const { MAX_AUTH_RETRIES } = require('./constants');
+const { version: packageVersion } = require('../package.json');
 
-const _configFieldIsValid = (field) => typeof field === 'string' && field.length > 0;
 const parseErrorToReadableJSON = (error) =>
   JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
 
 const createRequestWithDefaults = (tokenCache, Logger) => {
-  const {
-    request: { ca, cert, key, passphrase, rejectUnauthorized, proxy }
-  } = require('../config/config');
-
-  const defaults = {
-    ...(_configFieldIsValid(ca) && { ca: fs.readFileSync(ca) }),
-    ...(_configFieldIsValid(cert) && { cert: fs.readFileSync(cert) }),
-    ...(_configFieldIsValid(key) && { key: fs.readFileSync(key) }),
-    ...(_configFieldIsValid(passphrase) && { passphrase }),
-    ...(_configFieldIsValid(proxy) && { proxy }),
-    ...(typeof rejectUnauthorized === 'boolean' && { rejectUnauthorized })
-  };
+  const defaults = {};
 
   const requestWithDefaultsBuilder = (
     preRequestFunction = async () => ({}),
@@ -54,6 +42,7 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
 
       let postRequestFunctionResults;
       try {
+        Logger.trace({ requestOptions: _requestOptions }, 'Merged Request Options');
         const result = await _requestWithDefaults(_requestOptions);
 
         checkForStatusError(result, { ..._requestOptions, json: bodyWillBeJSON });
@@ -98,9 +87,8 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
     Logger.trace({ CHECK_FOR_STATUS: statusCode, body, requestOptions });
 
     const roundedStatus = Math.round(statusCode / 100) * 100;
-    const statusCodeNotSuccessful = !SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(
-      roundedStatus
-    );
+    const statusCodeNotSuccessful =
+      !SUCCESSFUL_ROUNDED_REQUEST_STATUS_CODES.includes(roundedStatus);
 
     if (statusCodeNotSuccessful) {
       const requestError = Error('Request Error');
@@ -114,6 +102,13 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
   const handleAuth = async (requestOptions) => {
     const isAuthRequest = get('headers.validity', requestOptions);
     const requestWithDefaults = requestWithDefaultsBuilder();
+
+    if (requestOptions.headers) {
+      requestOptions.headers = {
+        'User-Agent': `polarity-securonix-integration-${packageVersion}`,
+        ...requestOptions.headers
+      };
+    }
 
     if (!isAuthRequest) {
       const token = await getAuthToken(
