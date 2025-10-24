@@ -35,7 +35,7 @@ const getRiskHistory = async (entity, options, requestsInParallel, Logger) => {
     return flatten(riskscoreResponse);
   } catch (error) {
     const err = parseErrorToReadableJSON(error);
-    Logger.error({ ERR: err });
+    Logger.error({ ERR: err }, 'Error in getRiskHistory');
     throw err;
   }
 };

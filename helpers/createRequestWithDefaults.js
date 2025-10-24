@@ -12,6 +12,22 @@ const { version: packageVersion } = require('../package.json');
 const parseErrorToReadableJSON = (error) =>
   JSON.parse(JSON.stringify(error, Object.getOwnPropertyNames(error)));
 
+const sanitizeRequestOptions = (requestOptions) => {
+  const requestOptionsCopy = structuredClone(requestOptions);
+  if (requestOptionsCopy.headers) {
+    if (requestOptionsCopy.headers.password) {
+      requestOptionsCopy.headers.password = '************';
+    }
+    if (requestOptionsCopy.headers.token) {
+      requestOptionsCopy.headers.token = '************';
+    }
+    if (requestOptionsCopy.headers.Authorization) {
+      requestOptionsCopy.headers.Authorization = 'Bearer ************';
+    }
+  }
+
+  return requestOptionsCopy;
+};
 const createRequestWithDefaults = (tokenCache, Logger) => {
   const defaults = {};
 
@@ -75,15 +91,6 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
   };
 
   const checkForStatusError = ({ statusCode, body }, requestOptions) => {
-    const requestOptionsWithoutSensitiveData = {
-      ...requestOptions
-      // options: '{...}',
-      // headers: {
-      //   ...requestOptions.headers,
-      //   Authorization: 'Bearer ****************'
-      // }
-    };
-
     Logger.trace({ CHECK_FOR_STATUS: statusCode, body, requestOptions });
 
     const roundedStatus = Math.round(statusCode / 100) * 100;
@@ -94,7 +101,9 @@ const createRequestWithDefaults = (tokenCache, Logger) => {
       const requestError = Error('Request Error');
       requestError.status = statusCodeNotSuccessful ? statusCode : body.error;
       requestError.description = JSON.stringify(body);
-      requestError.requestOptions = JSON.stringify(requestOptions);
+      requestError.requestOptions = JSON.stringify(
+        sanitizeRequestOptions(requestOptions)
+      );
       throw requestError;
     }
   };

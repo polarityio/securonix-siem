@@ -35,7 +35,7 @@ const getTpi = async (entity, options, requestsInParallel, Logger) => {
     return flatten(tpiResponse);
   } catch (error) {
     const err = parseErrorToReadableJSON(error);
-    Logger.error({ ERR: err });
+    Logger.error({ ERR: err }, 'Error in getTpi');
     throw err;
   }
 };
