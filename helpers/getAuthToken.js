@@ -7,7 +7,7 @@ const parseErrorToReadableJSON = (error) =>
 const MAX_AUTH_RETRIES = 3;
 
 const getAuthToken = async (
-  { username, password, baseUrl },
+  { username, password, baseUrl, 'User-Agent': userAgent },
   requestWithDefaults,
   tokenCache,
   Logger,
@@ -27,17 +27,19 @@ const getAuthToken = async (
         uri: `${baseUrl}/Snypr/ws/token/generate`,
         headers: {
           username,
-          password
-          // validity: TIME_FOR_TOKEN_DAYS
+          password,
+          'User-Agent': userAgent,
+          validity: TIME_FOR_TOKEN_DAYS
         }
       })
     );
   } catch (error) {
+    Logger.error(error, 'Error fetching auth token');
     const err = parseErrorToReadableJSON(error);
 
     const { status } = err;
 
-    if (status === 403 && retriesLeft)
+    if (status === 403 && retriesLeft) {
       return await getAuthToken(
         { username, password, baseUrl },
         requestWithDefaults,
@@ -45,6 +47,10 @@ const getAuthToken = async (
         Logger,
         retriesLeft - 1
       );
+    } else {
+      // Couldn't get a token so throw the error
+      throw error;
+    }
   }
 
   if (newToken) tokenCache.set(authCacheKey, newToken);

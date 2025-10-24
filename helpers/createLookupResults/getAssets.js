@@ -35,7 +35,7 @@ const getAssets = async (entity, options, requestsInParallel, Logger) => {
     return flatten(assetResponse);
   } catch (error) {
     const err = parseErrorToReadableJSON(error);
-    Logger.error({ ERR: err });
+    Logger.error({ ERR: err }, 'Error in getAssets');
     throw err;
   }
 };
