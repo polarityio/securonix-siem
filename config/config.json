@@ -30,9 +30,15 @@
       "regex": "/\\w{3,}\\-\\w{3,}/"
     }
   ],
-  "entityTypes": ["IPv4", "email", "domain"],
+  "entityTypes": [
+    "IPv4",
+    "email",
+    "domain"
+  ],
   "customTypes": [],
-  "styles": ["./styles/styles.less"],
+  "styles": [
+    "./styles/styles.less"
+  ],
   "defaultColor": "light-blue",
   "onDemandOnly": true,
   "block": {
@@ -150,5 +156,10 @@
       "userCanEdit": false,
       "adminOnly": true
     }
-  ]
+  ],
+  "reducer": {
+    "details": {
+      "file": "./reducers/details.json"
+    }
+  }
 }
